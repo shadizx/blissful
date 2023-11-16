@@ -5,10 +5,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cmpt362.blissful.R
@@ -25,9 +27,7 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: GratitudeAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
@@ -39,6 +39,11 @@ class HomeFragment : Fragment() {
         arrayList = ArrayList()
         adapter = GratitudeAdapter(arrayList)
         recyclerView.adapter = adapter
+
+        val redirectButton: Button = root.findViewById(R.id.home_redirect_button)
+        redirectButton.setOnClickListener {
+            redirectToAdd()
+        }
 
         homeViewModel.gratitudeItems.observe(viewLifecycleOwner) {
             Log.d("HomeFragment", "Gratitude items changed: $it")
@@ -53,5 +58,11 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun redirectToAdd() {
+        val navController = findNavController()
+        navController.popBackStack()
+        findNavController().navigate(R.id.navigation_add)
     }
 }
