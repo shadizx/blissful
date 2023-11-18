@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Blissful</string>
+    <string name="title_home">Home</string>
+    <string name="title_add">Add</string>
+    <string name="title_profile">Profile</string>
+    <string name="login_activity_name">Login</string>
     <string name="open_login_activity">Open Login Activity</string>
+    <string name="register_activity_name">Register Activity</string>
+    <string name="open_register_activity">Open Register Activity</string>
+
 </resources>
