@@ -34,12 +34,20 @@ class ProfileFragment : Fragment() {
         binding.buttonOpenLogin.setOnClickListener {
             openLoginActivity()
         }
+        binding.buttonOpenRegister.setOnClickListener {
+            openRegisterActivity()
+        }
 
         return root
     }
 
     private fun openLoginActivity() {
         val intent = Intent(activity, LoginActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openRegisterActivity() {
+        val intent = Intent(activity, RegisterActivity::class.java)
         startActivity(intent)
     }
 
