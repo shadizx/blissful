@@ -9,21 +9,25 @@ class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
 
     val allUsers: Flow<List<User>> = userDatabaseDao.getAllUsers()
 
-    fun insert(user: User){
+    suspend fun insert(user: User){
         CoroutineScope(IO).launch{
             userDatabaseDao.insertUser(user)
         }
     }
 
-    fun delete(id: Long){
+    suspend fun delete(id: Long){
         CoroutineScope(IO).launch {
             userDatabaseDao.deleteUser(id)
         }
     }
 
-    fun deleteAll(){
+    suspend fun deleteAll(){
         CoroutineScope(IO).launch {
             userDatabaseDao.deleteAll()
         }
+    }
+
+    suspend fun isUserExist(username: String, password: String): Boolean {
+        return userDatabaseDao.isUserExist(username, password)
     }
 }
