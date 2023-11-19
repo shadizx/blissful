@@ -19,4 +19,8 @@ interface UserDatabaseDao {
 
     @Query("DELETE FROM user_table WHERE id = :key")
     suspend fun deleteUser(key: Long)
+
+    @Query("SELECT EXISTS(SELECT * FROM user_table WHERE username = :username AND password = :password)")
+    suspend fun isUserExist(username: String, password: String): Boolean
+
 }
