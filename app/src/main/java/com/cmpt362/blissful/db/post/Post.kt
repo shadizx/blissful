@@ -35,7 +35,7 @@ data class Post(
     val content: String,
 
     @ColumnInfo(name = "postDateTime")
-    val initialPostDateTime: Calendar = Calendar.getInstance(),
+    val postDateTime: Calendar = Calendar.getInstance(),
 
     @ColumnInfo(name = "title")
     val title: String?,
