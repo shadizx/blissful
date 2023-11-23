@@ -27,4 +27,8 @@ class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
     suspend fun isUserExist(username: String, password: String): Boolean {
         return userDatabaseDao.isUserExist(username, password)
     }
+
+    suspend fun isUsernameTaken(username: String): Boolean {
+        return userDatabaseDao.isUsernameTaken(username)
+    }
 }
