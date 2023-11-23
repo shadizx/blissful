@@ -44,7 +44,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 }
 
 class UserViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T { //create() creates a new instance of the modelClass, which is UserViewModel in this case.
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java))
             return UserViewModel(repository) as T
         throw IllegalArgumentException("Unknown ViewModel class")
