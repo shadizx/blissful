@@ -49,7 +49,6 @@ class RegisterActivity : AppCompatActivity() {
         buttonRegister.setOnClickListener {
             validateInput()
         }
-
     }
 
     private fun validateInput() {
@@ -57,11 +56,26 @@ class RegisterActivity : AppCompatActivity() {
         password = editTextPassword.text.toString()
 
         if (username.isNotEmpty() && password.isNotEmpty()) {
-            registerUser()
-            Toast.makeText(this, "Register Successful", Toast.LENGTH_SHORT).show()
+            checkIfUsernameTaken()
         } else {
             Toast.makeText(this, "Please enter both username and password", Toast.LENGTH_SHORT)
                 .show()
+        }
+    }
+
+    private fun checkIfUsernameTaken() {
+        userViewModel.checkIsUsernameTaken(username).observe(this) { isUsernameTaken ->
+            if (isUsernameTaken != null) {
+                if (isUsernameTaken) {
+                    Toast.makeText(this, "Username is already taken", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Proceed with registration
+                    registerUser()
+                    Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Username check in progress...", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

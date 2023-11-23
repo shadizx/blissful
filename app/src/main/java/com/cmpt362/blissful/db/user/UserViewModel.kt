@@ -41,6 +41,13 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
         return isUserExist
     }
+    fun checkIsUsernameTaken(username: String): LiveData<Boolean> {
+        val isUsernameTaken = MutableLiveData<Boolean>()
+        viewModelScope.launch {
+            isUsernameTaken.value = repository.isUsernameTaken(username)
+        }
+        return isUsernameTaken
+    }
 }
 
 class UserViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
