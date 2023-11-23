@@ -7,16 +7,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362.blissful.R
-import com.cmpt362.blissful.db.UserDatabase
-import com.cmpt362.blissful.db.UserDatabaseDao
-import com.cmpt362.blissful.db.UserRepository
-import com.cmpt362.blissful.db.UserViewModel
-import com.cmpt362.blissful.db.UserViewModelFactory
+import com.cmpt362.blissful.db.LocalRoomDatabase
+import com.cmpt362.blissful.db.user.UserDatabaseDao
+import com.cmpt362.blissful.db.user.UserRepository
+import com.cmpt362.blissful.db.user.UserViewModel
+import com.cmpt362.blissful.db.user.UserViewModelFactory
 
 class LoginActivity : AppCompatActivity() {
 
     // DB instances
-    private lateinit var database: UserDatabase
+    private lateinit var database: LocalRoomDatabase
     private lateinit var databaseDao: UserDatabaseDao
     private lateinit var repository: UserRepository
     private lateinit var viewModelFactory: UserViewModelFactory
@@ -31,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         // Initialize DB instances
-        database = UserDatabase.getInstance(this)
+        database = LocalRoomDatabase.getInstance(this)
         databaseDao = database.userDatabaseDao
         repository = UserRepository(databaseDao)
         viewModelFactory = UserViewModelFactory(repository)
