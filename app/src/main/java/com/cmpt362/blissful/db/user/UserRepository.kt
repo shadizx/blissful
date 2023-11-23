@@ -1,6 +1,12 @@
 package com.cmpt362.blissful.db.user
-
 import kotlinx.coroutines.flow.Flow
+
+/**
+ * Splitting repositories and DAOs for each table (e.g., User and Post) enhances the maintainability and clarity of the code.
+ * Each repository and DAO focuses on each table.
+ * This separation allows for more organized and manageable code, and also increases the scalability of the project.
+ * This approach is also considered a common best practices especially for large Android Project.
+ */
 
 class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
 
