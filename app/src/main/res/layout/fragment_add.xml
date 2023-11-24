@@ -16,7 +16,6 @@
         android:textStyle="bold" />
 
     <!-- Circular profile pic -->
-
     <com.mikhaellopez.circularimageview.CircularImageView
         android:layout_width="180dp"
         android:layout_height="180dp"
@@ -35,23 +34,15 @@
         android:backgroundTint="@android:color/system_neutral1_200"
         android:text="Add a Photo or Video" />
 
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="@android:color/system_neutral1_200"
-        android:layout_marginBottom="40dp"
-        android:text="Add an Audio Recording" />
-
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:hint="Describe this gratitude entry" />
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:maxLines="7"
+        android:hint="Describe what you're grateful for:"
+        />
+
 
     <Space
         android:layout_width="match_parent"
