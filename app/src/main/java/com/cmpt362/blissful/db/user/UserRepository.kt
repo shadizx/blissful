@@ -1,4 +1,5 @@
 package com.cmpt362.blissful.db.user
+
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -12,16 +13,12 @@ class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
 
     val allUsers: Flow<List<User>> = userDatabaseDao.getAllUsers()
 
-    suspend fun insert(user: User) {
-        userDatabaseDao.insertUser(user)
+    suspend fun insert(user: User): Int {
+        return userDatabaseDao.insert(user).toInt()
     }
 
     suspend fun delete(userId: Int) {
         userDatabaseDao.deleteUser(userId)
-    }
-
-    suspend fun deleteAll() {
-        userDatabaseDao.deleteAll()
     }
 
     suspend fun isUserExist(username: String, password: String): Boolean {
@@ -30,5 +27,9 @@ class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
 
     suspend fun isUsernameTaken(username: String): Boolean {
         return userDatabaseDao.isUsernameTaken(username)
+    }
+
+    suspend fun getIdForUser(username: String): Int {
+        return userDatabaseDao.getIdForUser(username)
     }
 }

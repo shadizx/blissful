@@ -7,16 +7,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362.blissful.R
-import com.cmpt362.blissful.db.user.User
 import com.cmpt362.blissful.db.LocalRoomDatabase
+import com.cmpt362.blissful.db.user.User
 import com.cmpt362.blissful.db.user.UserDatabaseDao
 import com.cmpt362.blissful.db.user.UserRepository
 import com.cmpt362.blissful.db.user.UserViewModel
 import com.cmpt362.blissful.db.user.UserViewModelFactory
 
-class RegisterActivity : AppCompatActivity() {
+class SignUpActivity : AppCompatActivity() {
 
-    // DB instances
     private lateinit var database: LocalRoomDatabase
     private lateinit var databaseDao: UserDatabaseDao
     private lateinit var repository: UserRepository
@@ -34,13 +33,11 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        // Initialize DB instances
         database = LocalRoomDatabase.getInstance(this)
         databaseDao = database.userDatabaseDao
         repository = UserRepository(databaseDao)
         viewModelFactory = UserViewModelFactory(repository)
         userViewModel = ViewModelProvider(this, viewModelFactory)[UserViewModel::class.java]
-
 
         editTextUsername = findViewById(R.id.editTextUsername)
         editTextPassword = findViewById(R.id.editTextPassword)
@@ -69,7 +66,6 @@ class RegisterActivity : AppCompatActivity() {
                 if (isUsernameTaken) {
                     Toast.makeText(this, "Username is already taken", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Proceed with registration
                     registerUser()
                     Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
                 }
@@ -80,10 +76,16 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun registerUser() {
-        // Create new user record
-        val newUserRecord = User(0, username, password)
+        val user = User(username = username, password = password)
+        userViewModel.insert(user).observe(this) { id ->
+            if (id != null) {
+                val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.putInt("userId", id)
+                editor.apply()
+                finish()
+            }
+        }
 
-        // Insert the new user by the view model, into the Room DB
-        userViewModel.insert(newUserRecord)
     }
 }

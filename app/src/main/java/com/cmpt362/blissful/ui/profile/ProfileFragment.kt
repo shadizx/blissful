@@ -1,58 +1,87 @@
 package com.cmpt362.blissful.ui.profile
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.cmpt362.blissful.databinding.FragmentProfileBinding
+import com.cmpt362.blissful.db.util.getUserId
+import com.cmpt362.blissful.db.util.signOut
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+
+    private var userId: Int = -1
+    private var isSignedIn: Boolean = false
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            getCredentials()
+            updateButtonsVisibility()
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
-
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textProfile
-        profileViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
-
-        // The button to open up login page
-        binding.buttonOpenLogin.setOnClickListener {
-            openLoginActivity()
-        }
-        binding.buttonOpenRegister.setOnClickListener {
-            openRegisterActivity()
-        }
+        getCredentials()
+        updateButtonsVisibility()
+        requireActivity().getSharedPreferences("user", 0)
+            .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
         return root
     }
 
-    private fun openLoginActivity() {
-        val intent = Intent(activity, LoginActivity::class.java)
-        startActivity(intent)
+    private fun updateButtonsVisibility() {
+        val profileText: String
+        if (isSignedIn) {
+            binding.signInButton.visibility = View.GONE
+            binding.signUpButton.visibility = View.GONE
+            binding.signOutButton.visibility = View.VISIBLE
+
+            if (!binding.signOutButton.hasOnClickListeners()) {
+                binding.signOutButton.setOnClickListener {
+                    signOut(requireContext())
+                }
+            }
+
+            profileText = "Signed in with id: $userId"
+        } else {
+            binding.signOutButton.visibility = View.GONE
+            binding.signInButton.visibility = View.VISIBLE
+            binding.signUpButton.visibility = View.VISIBLE
+
+            if (!binding.signInButton.hasOnClickListeners()) {
+                binding.signInButton.setOnClickListener {
+                    startActivity(Intent(activity, SignInActivity::class.java))
+                }
+            }
+            if (!binding.signUpButton.hasOnClickListeners()) {
+                binding.signUpButton.setOnClickListener {
+                    startActivity(Intent(activity, SignUpActivity::class.java))
+                }
+            }
+
+            profileText = "Not signed in"
+        }
+        binding.profileText.text = profileText
     }
 
-    private fun openRegisterActivity() {
-        val intent = Intent(activity, RegisterActivity::class.java)
-        startActivity(intent)
+    private fun getCredentials() {
+        userId = getUserId(requireContext())
+        isSignedIn = userId != -1
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().getSharedPreferences("user", 0)
+            .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
         _binding = null
     }
 }

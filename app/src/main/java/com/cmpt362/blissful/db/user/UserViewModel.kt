@@ -1,38 +1,25 @@
 package com.cmpt362.blissful.db.user
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.IllegalArgumentException
 
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
     private val allUsersLiveData: LiveData<List<User>> = repository.allUsers.asLiveData()
 
-    fun insert(user: User) {
+    fun insert(user: User): LiveData<Int> {
+        val id = MutableLiveData<Int>()
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insert(user)
+            id.postValue(repository.insert(user))
         }
+        return id
     }
-
-    fun deleteFirst() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val userList = allUsersLiveData.value
-            if (!userList.isNullOrEmpty()) {
-                val userId = userList[0].userId
-                repository.delete(userId)
-            }
-        }
-    }
-
-    fun deleteAll() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val userList = allUsersLiveData.value
-            if (!userList.isNullOrEmpty())
-                repository.deleteAll()
-        }
-    }
-
 
     fun checkUserForLogin(username: String, password: String): LiveData<Boolean> {
         val isUserExist = MutableLiveData<Boolean>()
@@ -41,12 +28,21 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
         return isUserExist
     }
+
     fun checkIsUsernameTaken(username: String): LiveData<Boolean> {
         val isUsernameTaken = MutableLiveData<Boolean>()
         viewModelScope.launch {
             isUsernameTaken.value = repository.isUsernameTaken(username)
         }
         return isUsernameTaken
+    }
+
+    fun getIdForUser(username: String): LiveData<Int> {
+        val id = MutableLiveData<Int>()
+        viewModelScope.launch {
+            id.value = repository.getIdForUser(username)
+        }
+        return id
     }
 }
 
