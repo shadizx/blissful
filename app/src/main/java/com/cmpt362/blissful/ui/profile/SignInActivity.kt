@@ -13,9 +13,8 @@ import com.cmpt362.blissful.db.user.UserRepository
 import com.cmpt362.blissful.db.user.UserViewModel
 import com.cmpt362.blissful.db.user.UserViewModelFactory
 
-class LoginActivity : AppCompatActivity() {
+class SignInActivity : AppCompatActivity() {
 
-    // DB instances
     private lateinit var database: LocalRoomDatabase
     private lateinit var databaseDao: UserDatabaseDao
     private lateinit var repository: UserRepository
@@ -30,7 +29,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Initialize DB instances
         database = LocalRoomDatabase.getInstance(this)
         databaseDao = database.userDatabaseDao
         repository = UserRepository(databaseDao)
@@ -54,12 +52,12 @@ class LoginActivity : AppCompatActivity() {
         if (username.isNotEmpty() && password.isNotEmpty()) {
             userViewModel.checkUserForLogin(username, password).observe(this) { exists ->
                 if (exists) {
-                    Toast.makeText(this@LoginActivity, "Login Successful", Toast.LENGTH_SHORT)
+                    Toast.makeText(this@SignInActivity, "Login Successful", Toast.LENGTH_SHORT)
                         .show()
-                    onLoginSucceed()
+                    onLoginSucceed(username)
                 } else {
                     Toast.makeText(
-                        this@LoginActivity,
+                        this@SignInActivity,
                         "Invalid username or password",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -71,7 +69,13 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun onLoginSucceed() {
-        //TODO: Logic on login succeed
+    private fun onLoginSucceed(username: String) {
+        userViewModel.getIdForUser(username).observe(this) { id ->
+            val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putInt("userId", id)
+            editor.apply()
+        }
+        finish()
     }
 }
