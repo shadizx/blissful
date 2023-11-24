@@ -11,7 +11,7 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
      * For queries returning Flow object, we don't need to make them run in coroutines as they are already doing so and run asynchronously.
      */
 
-    val allPosts: LiveData<List<Post>> = repository.getAllPosts().asLiveData()
+    val allPublicPosts: LiveData<List<Post>> = repository.getAllPosts().asLiveData()
 
     fun getPostsByUserId(userId: Int): LiveData<List<Post>> =
         repository.getPostsByUserId(userId).asLiveData()

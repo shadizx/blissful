@@ -14,7 +14,7 @@ interface PostDatabaseDao {
     @Insert
     suspend fun insertPost(post: Post)
 
-    @Query("SELECT * FROM post_table")
+    @Query("SELECT * FROM post_table WHERE isPublic = 1")
     fun getAllPosts(): Flow<List<Post>>
 
     @Query("SELECT * FROM post_table WHERE userId = :userId")
