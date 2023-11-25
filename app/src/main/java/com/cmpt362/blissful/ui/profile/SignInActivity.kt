@@ -24,8 +24,8 @@ class SignInActivity : AppCompatActivity() {
 
     private lateinit var editTextUsername: EditText
     private lateinit var editTextPassword: EditText
-    private lateinit var buttonLogin: Button
-    private lateinit var buttonCancel: Button
+    private lateinit var signInButton: Button
+    private lateinit var cancelButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,19 +39,19 @@ class SignInActivity : AppCompatActivity() {
 
         editTextUsername = findViewById(R.id.editTextUsername)
         editTextPassword = findViewById(R.id.editTextPassword)
-        buttonLogin = findViewById(R.id.buttonConfirm)
-        buttonCancel = findViewById(R.id.buttonCancel)
+        signInButton = findViewById(R.id.buttonConfirm)
+        cancelButton = findViewById(R.id.buttonCancel)
 
-        buttonLogin.text = getString(R.string.login)
-        buttonLogin.setOnClickListener {
-            loginUser()
+        signInButton.text = getString(R.string.sign_in)
+        signInButton.setOnClickListener {
+            signInUser()
         }
-        buttonCancel.setOnClickListener {
+        cancelButton.setOnClickListener {
             finish()
         }
     }
 
-    private fun loginUser() {
+    private fun signInUser() {
         val username = editTextUsername.text.toString()
         val password = editTextPassword.text.toString()
 
@@ -60,7 +60,7 @@ class SignInActivity : AppCompatActivity() {
                 if (exists) {
                     Toast.makeText(this@SignInActivity, "Login Successful", Toast.LENGTH_SHORT)
                         .show()
-                    onLoginSucceed(username)
+                    onSignedIn(username)
                 } else {
                     Toast.makeText(
                         this@SignInActivity,
@@ -75,7 +75,7 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    private fun onLoginSucceed(username: String) {
+    private fun onSignedIn(username: String) {
         userViewModel.getIdForUser(username).observe(this) { id ->
             val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
             val editor = sharedPreferences.edit()

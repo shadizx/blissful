@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:layout_marginBottom="56dp"
     tools:context=".ui.profile.ProfileFragment">
 
     <LinearLayout
@@ -14,69 +11,44 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Circular profile pic -->
-        <com.mikhaellopez.circularimageview.CircularImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/profile_photo"
-            app:civ_border_color="#808080"
-            app:civ_shadow="true"
-            app:civ_shadow_color="#808080"
-            app:civ_shadow_radius="10sp" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <TextView
-                android:id="@+id/profile_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/title_profile"
-                android:textAlignment="center"
-                android:textSize="35sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
         <TextView
-            android:id="@+id/stats_header"
-            android:layout_width="wrap_content"
+            android:id="@+id/profile_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="20dp"
-            android:gravity="start"
-            android:text="User Statistics"
-            android:textSize="25sp"
+            android:text="@string/title_profile"
+            android:textAlignment="center"
+            android:textSize="35sp"
+            android:paddingVertical="20dp"
             android:textStyle="bold" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:id="@+id/icon_posts"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:src="@drawable/post" />
+                    android:contentDescription="post icon"
+                    android:src="@drawable/post_icon" />
 
                 <TextView
                     android:id="@+id/num_posts"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Posts"
+                    android:text="Posts: 0"
                     android:textSize="20sp" />
             </LinearLayout>
 
@@ -85,20 +57,22 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:id="@+id/icon_points"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:src="@drawable/points" />
+                    android:contentDescription="points icon"
+                    android:src="@drawable/points_icon" />
 
                 <TextView
                     android:id="@+id/num_points"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Points collected"
+                    android:text="Points: 0"
                     android:textSize="20sp" />
             </LinearLayout>
         </LinearLayout>
@@ -113,7 +87,7 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
-<!--        Achievement component-->
+        <!--        Achievement component-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -174,7 +148,6 @@
                 android:max="100"
                 android:progress="70" />
         </LinearLayout>
-
 
 
         <LinearLayout
