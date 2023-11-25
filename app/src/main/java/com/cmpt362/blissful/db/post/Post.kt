@@ -37,9 +37,6 @@ data class Post(
     @ColumnInfo(name = "postDateTime")
     val postDateTime: Calendar = Calendar.getInstance(),
 
-    @ColumnInfo(name = "title")
-    val title: String?,
-
     @ColumnInfo(name = "isPublic")
     val isPublic: Boolean = false,
 
