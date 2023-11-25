@@ -18,14 +18,18 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362.blissful.databinding.FragmentAddBinding
+import com.cmpt362.blissful.db.post.PostDatabaseDao
+import com.cmpt362.blissful.db.post.PostRepository
+import com.cmpt362.blissful.db.post.PostViewModel
+import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.logic.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,6 +66,13 @@ class AddFragment : Fragment() {
     private lateinit var currentRadioButton: RadioButton
 
     private val tempImgFileName = "temp_image.jpg"
+
+    // Room variables and ViewModel
+    //private lateinit var database: PostDatabase
+    private lateinit var databaseDao: PostDatabaseDao
+    private lateinit var repository: PostRepository
+    private lateinit var viewModelFactory: PostViewModelFactory
+    private lateinit var PostViewModel: PostViewModel
     ////////////
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -78,20 +89,27 @@ class AddFragment : Fragment() {
         _binding = FragmentAddBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // Room variables and ViewModel
+//        database = PostDatabase.getInstance(requireActivity())
+//        databaseDao = database.PostDatabaseDao
+//        repository = PostRepository(databaseDao)
+//        viewModelFactory = PostViewModelFactory(repository)
+//        PostViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
+        
         tempImgFile = File(context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES), tempImgFileName)
 
         // URI for the images
         tempImgUri = context?.let {
             FileProvider.getUriForFile(
                 it,
-                " com.cmpt362.blissful", tempImgFile)
+                "com.cmpt362.blissful", tempImgFile)
         }!!
 
         // Buttons
         imageSaveButton = binding.photoSubmitButton
 
         imageSaveButton.setOnClickListener {
-
+            showAlertDialog()
         }
 
         cameraResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
@@ -144,21 +162,39 @@ class AddFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    private fun setInputToTextView() {
-//        if(mInput == "Select from Gallery"){
-//            // Opening The gallery
-//            intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//            intent.type = "image/*"
-//            galleryResult.launch(intent)
-//        }
-//        else if(mInput == "Open Camera"){
-//            // Generating the intent and clicking the image
-//            intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-//            intent.putExtra(MediaStore.EXTRA_OUTPUT, tempImgUri)
-//            cameraResult.launch(intent)
-//        }
+
+    private fun showAlertDialog() {
+        val pictureDialogItems = arrayOf("Select photo from Gallery", "Capture photo from Camera")
+        activity?.let {
+            AlertDialog.Builder(it)
+                .setTitle("Enter your gratitude")
+                .setItems(pictureDialogItems) { _, which ->
+                    when (which) {
+                        0 -> gallery()
+                        1 -> camera()
+                    }
+                }
+                //.setView(editText)
+//                .setNegativeButton("Cancel", null)
+//                .setPositiveButton("OK", null)
+                .show()
+        }
     }
 
+    fun camera(){
+        // Generating the intent and clicking the image
+        intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempImgUri)
+        cameraResult.launch(intent)
+    }
+
+    fun gallery(){
+        // Opening The gallery
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        galleryResult.launch(intent)
+
+    }
     private suspend fun openFile(file: File, bitmap: Bitmap) =
         withContext(Dispatchers.IO) {
             val fileOut = FileOutputStream(file)

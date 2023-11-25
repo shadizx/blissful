@@ -1,9 +1,11 @@
 package com.cmpt362.blissful.db.post
 
+import android.graphics.Bitmap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
+import androidx.room.TypeConverters
 import com.cmpt362.blissful.db.user.User
 import java.util.*
 
@@ -18,6 +20,7 @@ import java.util.*
         )
     ]
 )
+@TypeConverters(Converters::class)
 data class Post(
     @PrimaryKey(autoGenerate = true)
     val postId: Int = 0,
@@ -53,5 +56,8 @@ data class Post(
     val lastUpdateDateTime: Calendar = Calendar.getInstance(),
 
     @ColumnInfo(name = "location")
-    val location: String?
+    val location: String?,
+
+    @ColumnInfo(name = "image")
+    val image: Bitmap
 )
