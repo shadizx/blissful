@@ -24,15 +24,15 @@ class SignUpActivity : AppCompatActivity() {
 
     private lateinit var editTextUsername: EditText
     private lateinit var editTextPassword: EditText
-    private lateinit var buttonRegister: Button
-    private lateinit var buttonCancel: Button
+    private lateinit var signUpButton: Button
+    private lateinit var cancelButton: Button
 
     private lateinit var username: String
     private lateinit var password: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+        setContentView(R.layout.activity_sign_up)
 
         database = LocalRoomDatabase.getInstance(this)
         databaseDao = database.userDatabaseDao
@@ -42,15 +42,15 @@ class SignUpActivity : AppCompatActivity() {
 
         editTextUsername = findViewById(R.id.editTextUsername)
         editTextPassword = findViewById(R.id.editTextPassword)
-        buttonRegister = findViewById(R.id.buttonConfirm)
-        buttonCancel = findViewById(R.id.buttonCancel)
+        signUpButton = findViewById(R.id.buttonConfirm)
+        cancelButton = findViewById(R.id.buttonCancel)
 
 
-        buttonRegister.text = getString(R.string.register)
-        buttonRegister.setOnClickListener {
+        signUpButton.text = getString(R.string.sign_up)
+        signUpButton.setOnClickListener {
             validateInput()
         }
-        buttonCancel.setOnClickListener {
+        cancelButton.setOnClickListener {
             finish()
         }
     }
@@ -73,7 +73,7 @@ class SignUpActivity : AppCompatActivity() {
                 if (isUsernameTaken) {
                     Toast.makeText(this, "Username is already taken", Toast.LENGTH_SHORT).show()
                 } else {
-                    registerUser()
+                    signUpUser()
                     Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
                 }
             } else {
@@ -82,7 +82,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    private fun registerUser() {
+    private fun signUpUser() {
         val user = User(username = username, password = password)
         userViewModel.insert(user).observe(this) { id ->
             if (id != null) {

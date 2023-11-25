@@ -10,5 +10,7 @@
     <string name="sign_out">Sign Out</string>
     <string name="register">Register</string>
     <string name="login">Login</string>
+    <string name="blissful">Blissful</string>
     <string name="not_signed_in">Not signed in</string>
+    <string name="post_count">Posts: %1$d</string>
 </resources>
