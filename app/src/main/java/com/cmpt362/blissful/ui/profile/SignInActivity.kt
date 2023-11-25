@@ -1,5 +1,6 @@
 package com.cmpt362.blissful.ui.profile
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -81,6 +82,7 @@ class SignInActivity : AppCompatActivity() {
             editor.putInt("userId", id)
             editor.apply()
         }
+        setResult(Activity.RESULT_OK)
         finish()
     }
 }

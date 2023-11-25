@@ -7,51 +7,17 @@
     android:orientation="vertical"
     tools:context=".ui.profile.ProfileFragment">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="10dp">
+    <ViewFlipper
+        android:id="@+id/view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/profile_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/title_profile"
-            android:textAlignment="center"
-            android:textSize="20sp" />
+        <!-- View for signed in state -->
+        <include layout="@layout/fragment_profile_signedin" />
 
-    </LinearLayout>
+        <!-- View for not signed in state -->
+        <include layout="@layout/fragment_profile_signedout" />
 
-    <LinearLayout
-        android:id="@+id/auth_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/sign_out_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sign_out" />
-
-        <Button
-            android:id="@+id/sign_in_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:text="@string/sign_in" />
-
-        <TextView
-            android:id="@+id/sign_up_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/sign_up"
-            android:textColor="?attr/colorPrimary" />
-    </LinearLayout>
+    </ViewFlipper>
 
 </LinearLayout>
