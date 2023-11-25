@@ -31,9 +31,6 @@ import java.io.File
 import java.io.FileOutputStream
 import android.widget.EditText
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.cmpt362.blissful.databinding.FragmentAddBinding
 import com.cmpt362.blissful.db.LocalRoomDatabase
 import com.cmpt362.blissful.db.post.Post
 import com.cmpt362.blissful.db.post.PostDatabaseDao
