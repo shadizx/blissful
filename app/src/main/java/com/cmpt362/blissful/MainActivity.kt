@@ -9,6 +9,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.cmpt362.blissful.databinding.ActivityMainBinding
+import com.cmpt362.blissful.logic.Util
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,5 +35,7 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        Util.checkPermissions(this)
     }
 }
