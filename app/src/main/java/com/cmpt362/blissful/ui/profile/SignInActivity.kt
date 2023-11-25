@@ -24,6 +24,7 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var editTextUsername: EditText
     private lateinit var editTextPassword: EditText
     private lateinit var buttonLogin: Button
+    private lateinit var buttonCancel: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +36,17 @@ class SignInActivity : AppCompatActivity() {
         viewModelFactory = UserViewModelFactory(repository)
         userViewModel = ViewModelProvider(this, viewModelFactory)[UserViewModel::class.java]
 
-
         editTextUsername = findViewById(R.id.editTextUsername)
         editTextPassword = findViewById(R.id.editTextPassword)
-        buttonLogin = findViewById(R.id.buttonLogin)
+        buttonLogin = findViewById(R.id.buttonConfirm)
+        buttonCancel = findViewById(R.id.buttonCancel)
 
+        buttonLogin.text = getString(R.string.login)
         buttonLogin.setOnClickListener {
             loginUser()
+        }
+        buttonCancel.setOnClickListener {
+            finish()
         }
     }
 

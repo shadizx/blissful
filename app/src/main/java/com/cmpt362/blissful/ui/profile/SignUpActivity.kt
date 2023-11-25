@@ -25,6 +25,7 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var editTextUsername: EditText
     private lateinit var editTextPassword: EditText
     private lateinit var buttonRegister: Button
+    private lateinit var buttonCancel: Button
 
     private lateinit var username: String
     private lateinit var password: String
@@ -41,10 +42,16 @@ class SignUpActivity : AppCompatActivity() {
 
         editTextUsername = findViewById(R.id.editTextUsername)
         editTextPassword = findViewById(R.id.editTextPassword)
-        buttonRegister = findViewById(R.id.buttonRegister)
+        buttonRegister = findViewById(R.id.buttonConfirm)
+        buttonCancel = findViewById(R.id.buttonCancel)
 
+
+        buttonRegister.text = getString(R.string.register)
         buttonRegister.setOnClickListener {
             validateInput()
+        }
+        buttonCancel.setOnClickListener {
+            finish()
         }
     }
 
