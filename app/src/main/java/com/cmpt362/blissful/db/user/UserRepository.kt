@@ -32,4 +32,8 @@ class UserRepository(private val userDatabaseDao: UserDatabaseDao) {
     suspend fun getIdForUser(username: String): Int {
         return userDatabaseDao.getIdForUser(username)
     }
+
+    suspend fun getUsernameForUserId(userId: Int): String? {
+        return userDatabaseDao.getUsernameForUserId(userId)
+    }
 }

@@ -10,6 +10,5 @@
     <string name="sign_out">Sign Out</string>
     <string name="register">Register</string>
     <string name="login">Login</string>
-
-
+    <string name="not_signed_in">Not signed in</string>
 </resources>
