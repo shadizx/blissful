@@ -40,8 +40,17 @@
         android:inputType="textMultiLine"
         android:minLines="3"
         android:maxLines="7"
+        android:maxLength="1000"
         android:hint="Describe what you're grateful for:"
         />
+
+    <TextView
+        android:id="@+id/characterCountText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:textSize="12sp"
+        android:text="Max 1000 characters" />
 
 
     <Space
