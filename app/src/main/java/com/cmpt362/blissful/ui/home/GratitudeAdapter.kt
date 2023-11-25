@@ -21,13 +21,13 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = gratitudeItems[position]
-        val dateFormat = SimpleDateFormat("MMMM d, yyyy - hh:mm a", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
         holder.itemHeader.text = item.title ?: "Post ${item.postId}"
         holder.itemDescription.text = item.content
-        holder.itemLocation.text = "Location: ${item.location ?: "Unknown"}"
-        holder.itemPostDate.text = "Posted: ${dateFormat.format(item.postDateTime.time)}"
+        holder.itemLocation.text = item.location ?: "Unknown"
+        holder.itemPostDate.text = dateFormat.format(item.postDateTime.time)
         holder.itemLastUpdateDate.text =
-            "Last Update: ${dateFormat.format(item.lastUpdateDateTime.time)}"
+            "Updated: ${dateFormat.format(item.lastUpdateDateTime.time)}"
         holder.itemNumberOfLikes.text = item.likesCount.toString()
     }
 

@@ -20,6 +20,9 @@ interface PostDatabaseDao {
     @Query("SELECT * FROM post_table WHERE userId = :userId")
     fun getAllPostsByUserId(userId: Int): Flow<List<Post>>
 
+    @Query("SELECT * FROM post_table WHERE isPublic = 1 AND userId != :userId")
+    fun getAllPostsWithoutUserId(userId: Int): Flow<List<Post>>
+
     @Query("SELECT * FROM post_table WHERE postId = :postId")
     fun getPostById(postId: Int): Flow<Post>
 

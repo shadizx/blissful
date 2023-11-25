@@ -16,6 +16,9 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
     fun getPostsByUserId(userId: Int): LiveData<List<Post>> =
         repository.getPostsByUserId(userId).asLiveData()
 
+    fun getPostsWithoutUserId(userId: Int): LiveData<List<Post>> =
+        repository.getPostsWithoutUserId(userId).asLiveData()
+
     fun getPostById(postId: Int): LiveData<Post> = repository.getPostById(postId).asLiveData()
 
     fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): LiveData<List<Post>> =
