@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="blissful" parent="@style/Theme.MaterialComponents">
+        <item name="colorPrimary">#e4e4e7</item>
+    </style>
+</resources>

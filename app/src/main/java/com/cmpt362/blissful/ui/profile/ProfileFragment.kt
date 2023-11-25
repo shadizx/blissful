@@ -1,6 +1,5 @@
 package com.cmpt362.blissful.ui.profile
 
-import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -42,6 +41,7 @@ class ProfileFragment : Fragment() {
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
             getCredentials()
+            setUpPage()
         }
 
     override fun onCreateView(
@@ -52,6 +52,8 @@ class ProfileFragment : Fragment() {
 
         viewFlipper = root.findViewById(R.id.view_flipper)
         getCredentials()
+        setUpPage()
+
         requireActivity().getSharedPreferences("user", 0)
             .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
@@ -61,7 +63,9 @@ class ProfileFragment : Fragment() {
     private fun getCredentials() {
         userId = getUserId(requireContext())
         isSignedIn = userId != -1
+    }
 
+    private fun setUpPage() {
         if (isSignedIn) {
             viewFlipper.displayedChild = 0 // Index of the signed-in view
             setUpSignedInPage()
@@ -94,11 +98,13 @@ class ProfileFragment : Fragment() {
 
         signInButton.setOnClickListener {
             val intent = Intent(requireContext(), SignInActivity::class.java)
-            startActivity(intent) }
+            startActivity(intent)
+        }
 
         signUpButton.setOnClickListener {
             val intent = Intent(activity, SignUpActivity::class.java)
-            startActivity(intent) }
+            startActivity(intent)
+        }
     }
 
     private fun setupDatabase() {

@@ -9,26 +9,24 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Blissful">
+        android:theme="@style/blissful">
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustPan"
             android:exported="true"
-            android:label="@string/app_name">
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".ui.profile.SignInActivity"
-            android:label="@string/login_activity_name" />
+            android:label="@string/sign_in" />
 
         <activity
             android:name=".ui.profile.SignUpActivity"
-            android:label="@string/register_activity_name" />
+            android:label="@string/sign_up" />
     </application>
 
 </manifest>
