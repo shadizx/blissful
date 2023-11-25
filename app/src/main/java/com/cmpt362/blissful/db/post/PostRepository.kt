@@ -16,6 +16,9 @@ class PostRepository(private val postDatabaseDao: PostDatabaseDao) {
     fun getPostsByUserId(userId: Int): Flow<List<Post>> =
         postDatabaseDao.getAllPostsByUserId(userId)
 
+    fun getPostsWithoutUserId(userId: Int): Flow<List<Post>> =
+        postDatabaseDao.getAllPostsWithoutUserId(userId)
+
     fun getPostById(postId: Int): Flow<Post> = postDatabaseDao.getPostById(postId)
 
     fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): Flow<List<Post>> =
