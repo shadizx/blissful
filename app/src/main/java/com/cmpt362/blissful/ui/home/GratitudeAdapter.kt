@@ -22,7 +22,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = gratitudeItems[position]
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
-        holder.itemHeader.text = item.title ?: "Post ${item.postId}"
         holder.itemDescription.text = item.content
         holder.itemLocation.text = item.location ?: "Unknown"
         holder.itemPostDate.text = dateFormat.format(item.postDateTime.time)
@@ -42,7 +41,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val itemHeader: TextView = itemView.findViewById(R.id.itemHeader)
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
         val itemLocation: TextView = itemView.findViewById(R.id.itemLocation)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)

@@ -10,13 +10,6 @@
         android:layout_marginBottom="5dp"
         android:background="@android:color/darker_gray" />
 
-    <TextView
-        android:id="@+id/itemHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:textStyle="bold" />
-
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,19 +21,21 @@
             android:layout_height="wrap_content" />
 
         <ImageView
-            android:id="@+id/thumbsUpIcon"
+            android:id="@+id/heart_icon"
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_alignParentEnd="true"
+            android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="12dp"
-            android:src="@drawable/thumbs_up" />
+            android:src="@drawable/heart_icon" />
 
         <TextView
             android:id="@+id/itemNumberOfLikes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
+            android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
 
     </RelativeLayout>

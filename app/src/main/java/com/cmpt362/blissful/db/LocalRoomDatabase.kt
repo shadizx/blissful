@@ -11,7 +11,7 @@ import com.cmpt362.blissful.db.user.User
 import com.cmpt362.blissful.db.user.UserDatabaseDao
 import com.cmpt362.blissful.db.util.Converters
 
-@Database(entities = [Post::class, User::class], version = 1)
+@Database(entities = [Post::class, User::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class LocalRoomDatabase : RoomDatabase() {
     abstract val postDatabaseDao: PostDatabaseDao
