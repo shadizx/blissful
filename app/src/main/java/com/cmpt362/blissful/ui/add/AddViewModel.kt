@@ -1,5 +1,6 @@
 package com.cmpt362.blissful.ui.add
 
+import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,4 +11,5 @@ class AddViewModel : ViewModel() {
         value = "This is add Fragment"
     }
     val text: LiveData<String> = _text
+    val newImage = MutableLiveData<Bitmap>()
 }
