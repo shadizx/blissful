@@ -1,11 +1,9 @@
 package com.cmpt362.blissful.ui.add
 
-
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -22,6 +20,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -46,7 +45,6 @@ import java.io.FileOutputStream
 class AddFragment : Fragment() {
 
     private var _binding: FragmentAddBinding? = null
-
     private lateinit var tempImgUri: Uri
     private lateinit var addViewModel: AddViewModel
     private lateinit var cameraResult: ActivityResultLauncher<Intent>
@@ -72,6 +70,7 @@ class AddFragment : Fragment() {
     private lateinit var viewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -89,17 +88,14 @@ class AddFragment : Fragment() {
         postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
 
         // temp file to store user selected image
-        tempImgFile = File(context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES), tempImgFileName)
-        // Placeholder image to bitmap
-        val placeHolderImage = BitmapFactory.decodeResource(
-            requireContext().resources,
-            R.drawable.photo_icon
-        )
+        tempImgFile =
+            File(context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES), tempImgFileName)
         // URI for the images
         tempImgUri = context?.let {
             FileProvider.getUriForFile(
                 it,
-                "com.cmpt362.blissful", tempImgFile)
+                "com.cmpt362.blissful", tempImgFile
+            )
         }!!
 
         // Image save Button
@@ -110,7 +106,7 @@ class AddFragment : Fragment() {
 
         cameraResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
         { result: ActivityResult ->
-            if(result.resultCode == Activity.RESULT_OK){
+            if (result.resultCode == Activity.RESULT_OK) {
                 val bitmap = getBitmap(requireContext(), tempImgUri)
                 addViewModel.newImage.value = bitmap
             }
@@ -118,7 +114,7 @@ class AddFragment : Fragment() {
 
         galleryResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
         { result: ActivityResult ->
-            if(result.resultCode == Activity.RESULT_OK){
+            if (result.resultCode == Activity.RESULT_OK) {
                 tempImgUri = result.data?.data!!
                 val bitmap = getBitmap(requireContext(), tempImgUri)
                 addViewModel.newImage.value = bitmap
@@ -130,8 +126,7 @@ class AddFragment : Fragment() {
                     )
                     CoroutineScope(Dispatchers.IO).launch { openFile(file, bitmap) }
 
-                }
-                catch (e: Exception){
+                } catch (e: Exception) {
                     Log.e(ContentValues.TAG, "File not saved: ", e)
                 }
 
@@ -143,15 +138,14 @@ class AddFragment : Fragment() {
         addViewModel.newImage.observe(
             viewLifecycleOwner,
         ) {
-            if(it != placeHolderImage) {
+            if (it != null) {
                 // User selected Image
                 imageView = binding.imageView
                 imageView.setImageBitmap(it)
-            }
-            else{
+            } else {
                 // Resetting back to placeholder image
                 imageView = binding.imageView
-                imageView.setImageDrawable(resources.getDrawable(R.drawable.photo_icon))
+                imageView.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.photo_icon))
             }
         }
 
@@ -159,12 +153,10 @@ class AddFragment : Fragment() {
         submitButton = binding.submitButton
         submitButton.setOnClickListener {
             submitPost()
-            // Resetting back to placeholder image
-            addViewModel.newImage.value = placeHolderImage
+            addViewModel.newImage.value = null
         }
 
         return binding.root
-
     }
 
     override fun onDestroyView() {
@@ -187,20 +179,6 @@ class AddFragment : Fragment() {
         }
     }
 
-    private fun camera(){
-        // Generating the intent and clicking the image
-        intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempImgUri)
-        cameraResult.launch(intent)
-    }
-
-    private fun gallery(){
-        // Opening The gallery
-        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        intent.type = "image/*"
-        galleryResult.launch(intent)
-
-    }
     private suspend fun openFile(file: File, bitmap: Bitmap) =
         withContext(Dispatchers.IO) {
             val fileOut = FileOutputStream(file)
@@ -208,6 +186,23 @@ class AddFragment : Fragment() {
             fileOut.flush()
             fileOut.close()
         }
+
+
+    private fun camera() {
+        // Generating the intent and clicking the image
+        intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempImgUri)
+        cameraResult.launch(intent)
+    }
+
+    private fun gallery() {
+        // Opening The gallery
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        galleryResult.launch(intent)
+
+    }
+
     private fun submitPost() {
         val userId = getUserId(requireContext())
         if (userId == -1) {
@@ -219,16 +214,36 @@ class AddFragment : Fragment() {
         } else {
             val postText = postTextView.text.toString()
             if (postText.isNotEmpty()) {
-                val post = Post(
-                    userId = userId,
-                    content = postText,
-                    location = "",
-                )
+
+                var post =
+                    Post(
+                        userId = userId,
+                        content = postText,
+                        location = "",
+                    )
+
+                if (addViewModel.newImage.value!= null) {
+
+                    try {
+                        post =
+                            addViewModel.newImage.value?.let {
+                                Post(
+                                    userId = userId,
+                                    content = postText,
+                                    location = "",
+                                    image = it,
+                                )
+                            }!!
+                    } catch (e: Exception) {
+                        Log.e(ContentValues.TAG, "File not saved: ", e)
+                    }
+
+
+                }
                 postViewModel.insert(post)
                 postTextView.text.clear()
                 Toast.makeText(requireContext(), "Post submitted", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
 }
