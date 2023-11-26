@@ -11,5 +11,5 @@ class AddViewModel : ViewModel() {
         value = "This is add Fragment"
     }
     val text: LiveData<String> = _text
-    val newImage = MutableLiveData<Bitmap>()
+    var newImage = MutableLiveData<Bitmap>()
 }

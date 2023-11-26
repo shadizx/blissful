@@ -1,9 +1,12 @@
 package com.cmpt362.blissful.ui.add
 
+
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -13,7 +16,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,24 +26,23 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentAddBinding
-import com.cmpt362.blissful.db.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import android.widget.EditText
-import android.widget.Toast
 import com.cmpt362.blissful.db.LocalRoomDatabase
 import com.cmpt362.blissful.db.post.Post
 import com.cmpt362.blissful.db.post.PostDatabaseDao
 import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
+import com.cmpt362.blissful.db.util.Util
 import com.cmpt362.blissful.db.util.getUserId
-import java.util.Calendar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+
 
 class AddFragment : Fragment() {
 
@@ -85,9 +89,13 @@ class AddFragment : Fragment() {
         viewModelFactory = PostViewModelFactory(repository)
         postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
 
-
+        // temp file to store user selected image
         tempImgFile = File(context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES), tempImgFileName)
-
+        // Placeholder image to bitmap
+        val placeHolderImage = BitmapFactory.decodeResource(
+            requireContext().resources,
+            R.drawable.photo_icon
+        )
         // URI for the images
         tempImgUri = context?.let {
             FileProvider.getUriForFile(
@@ -95,9 +103,8 @@ class AddFragment : Fragment() {
                 "com.cmpt362.blissful", tempImgFile)
         }!!
 
-        // Buttons
+        // Image save Button
         imageSaveButton = binding.photoSubmitButton
-
         imageSaveButton.setOnClickListener {
             showAlertDialog()
         }
@@ -137,14 +144,24 @@ class AddFragment : Fragment() {
         addViewModel.newImage.observe(
             viewLifecycleOwner,
         ) {
-            imageView = binding.imageView
-            imageView.setImageBitmap(it)
+            if(it != placeHolderImage) {
+                // User selected Image
+                imageView = binding.imageView
+                imageView.setImageBitmap(it)
+            }
+            else{
+                // Resetting back to placeholder image
+                imageView = binding.imageView
+                imageView.setImageDrawable(resources.getDrawable(R.drawable.photo_icon))
+            }
         }
 
         postTextView = binding.postInput
         submitButton = binding.submitButton
         submitButton.setOnClickListener {
             submitPost()
+            // Resetting back to placeholder image
+            addViewModel.newImage.value = placeHolderImage
         }
 
         return binding.root
