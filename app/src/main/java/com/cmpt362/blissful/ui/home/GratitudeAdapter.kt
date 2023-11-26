@@ -1,5 +1,8 @@
 package com.cmpt362.blissful.ui.home
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +19,7 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     override fun onCreateViewHolder(viewgroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewgroup.context)
             .inflate(R.layout.home_gratitude_list_item, viewgroup, false)
+
         return ViewHolder(view)
     }
 
@@ -28,6 +32,14 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         holder.itemLastUpdateDate.text =
             "Updated: ${dateFormat.format(item.lastUpdateDateTime.time)}"
         holder.itemNumberOfLikes.text = item.likesCount.toString()
+        // setting up the image, gone if text only, visible if text and image present
+        holder.itemImage.setImageBitmap(item.image)
+        holder.itemImage.visibility = View.VISIBLE
+        if (item.image == null) {
+            holder.itemImage.visibility = View.GONE
+        }
+
+
     }
 
     override fun getItemCount(): Int {
@@ -41,6 +53,7 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val itemImage: ImageView = itemView.findViewById(R.id.itemImage)
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
         val itemLocation: TextView = itemView.findViewById(R.id.itemLocation)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)

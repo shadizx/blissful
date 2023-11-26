@@ -1,5 +1,8 @@
 package com.cmpt362.blissful.db.util
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.room.TypeConverter
+import java.io.ByteArrayOutputStream
 import java.util.Calendar
 
 object Converters {
@@ -14,4 +17,20 @@ object Converters {
     @TypeConverter
     fun datestampToCalendar(value: Long): Calendar =
         Calendar.getInstance().apply { timeInMillis = value }
+
+    /**
+     * A type converter between BITMAP AND BYTEARRAY
+     */
+    @TypeConverter
+    fun fromBitMap(bitmap: Bitmap): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        return outputStream.toByteArray()
+    }
+
+    @TypeConverter
+    fun toBitMap(byteArray: ByteArray): Bitmap {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
 }

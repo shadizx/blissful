@@ -22,7 +22,7 @@
         android:contentDescription="photo icon"
         android:minWidth="150dp"
         android:minHeight="150dp"
-        app:srcCompat="@drawable/photo_icon" />
+        app:srcCompat="@drawable/image_icon" />
 
 
     <Button
