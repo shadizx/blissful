@@ -13,4 +13,7 @@
     <string name="blissful">Blissful</string>
     <string name="not_signed_in">Not signed in</string>
     <string name="post_count">Posts: %1$d</string>
+    <string name="settings">Settings</string>
+    <string name="daily_notification">Do you want daily notification?</string>
+    <string name="back">Back</string>
 </resources>

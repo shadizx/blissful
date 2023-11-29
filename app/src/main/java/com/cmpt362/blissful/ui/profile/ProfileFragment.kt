@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.ViewFlipper
 import androidx.fragment.app.Fragment
@@ -32,6 +33,7 @@ class ProfileFragment : Fragment() {
     private lateinit var userViewModel: UserViewModel
 
     private lateinit var viewFlipper: ViewFlipper
+    private lateinit var settingsButton: ImageButton
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
@@ -56,6 +58,12 @@ class ProfileFragment : Fragment() {
 
         requireActivity().getSharedPreferences("user", 0)
             .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+
+        settingsButton = root.findViewById(R.id.buttonSetting)
+        settingsButton.setOnClickListener {
+            val intent = Intent(requireContext(), SettingsActivity::class.java)
+            startActivity(intent)
+        }
 
         return root
     }
