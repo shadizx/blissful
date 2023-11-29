@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -79,4 +80,30 @@ dependencies {
 
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$roomVersion")
+
+    // Firebase
+
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth")
+
+    // Also add the dependency for the Google Play services library and specify its version
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
+    implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
+    implementation("com.google.firebase:firebase-storage-ktx")
 }
