@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="504dp"
+        android:layout_marginTop="480dp"
         android:layout_marginBottom="16dp"
         android:layout_below="@id/switch_daily_notification"
         android:text="@string/back" />
