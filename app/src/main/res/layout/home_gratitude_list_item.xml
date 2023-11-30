@@ -6,8 +6,8 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="5dp"
+        android:layout_height="2dp"
+        android:layout_marginVertical="10dp"
         android:background="@android:color/darker_gray" />
 
     <RelativeLayout
@@ -18,7 +18,8 @@
         <TextView
             android:id="@+id/itemDescription"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"/>
 
         <ImageView
             android:id="@+id/heart_icon"
@@ -44,12 +45,11 @@
         android:id="@+id/itemImage"
         android:layout_width="300dp"
         android:layout_height="100dp"
-        android:layout_marginEnd="12dp"
         android:layout_gravity="start"
-         />
+        android:layout_marginEnd="12dp" />
 
     <TextView
-        android:id="@+id/itemLocation"
+        android:id="@+id/authorUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp" />

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,10 +15,10 @@
             android:id="@+id/profile_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingVertical="20dp"
             android:text="@string/title_profile"
             android:textAlignment="center"
             android:textSize="35sp"
-            android:paddingVertical="20dp"
             android:textStyle="bold" />
 
 
@@ -149,12 +149,31 @@
                 android:progress="70" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
+            android:gravity="start"
+            android:text="Your Posts"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/user_posts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:clipToPadding="false" />
 
         <LinearLayout
             android:id="@+id/auth_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="?actionBarSize">
 
             <Button
                 android:id="@+id/sign_out_button"
@@ -166,4 +185,4 @@
         </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
