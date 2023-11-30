@@ -32,9 +32,6 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var publicPostsArrayList: ArrayList<Post>
     private lateinit var publicPostsAdapter: GratitudeAdapter
-    private lateinit var userPostsArrayList: ArrayList<Post>
-    private lateinit var userPostsAdapter: GratitudeAdapter
-    private lateinit var userPostsHeader: TextView
 
     // DB instances
     private lateinit var database: LocalRoomDatabase
@@ -44,7 +41,6 @@ class HomeFragment : Fragment() {
     private lateinit var postViewModel: PostViewModel
 
     private lateinit var publicPostsRecyclerView: RecyclerView
-    private lateinit var userPostsRecyclerView: RecyclerView
 
     // Logged in state
     private var userId: Int = -1
@@ -65,21 +61,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun initializeAdapter(root: View) {
-        // public posts
         publicPostsRecyclerView = root.findViewById(R.id.public_posts)
         publicPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         publicPostsArrayList = ArrayList()
         publicPostsAdapter = GratitudeAdapter(publicPostsArrayList)
         publicPostsRecyclerView.adapter = publicPostsAdapter
         publicPostsRecyclerView.isNestedScrollingEnabled = false
-
-        // user posts
-        userPostsRecyclerView = root.findViewById(R.id.user_posts)
-        userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        userPostsArrayList = ArrayList()
-        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
-        userPostsRecyclerView.adapter = userPostsAdapter
-        userPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
     private fun getCredentials() {
@@ -89,12 +76,6 @@ class HomeFragment : Fragment() {
 
     private fun updateDisplayedPosts() {
         if (isSignedIn) {
-            postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) {
-                userPostsAdapter.setData(it)
-                userPostsAdapter.notifyDataSetChanged()
-                userPostsRecyclerView.adapter = userPostsAdapter
-            }
-
             postViewModel.getPostsWithoutUserId(userId).observe(viewLifecycleOwner) {
                 publicPostsAdapter.setData(it)
                 publicPostsAdapter.notifyDataSetChanged()
@@ -106,7 +87,6 @@ class HomeFragment : Fragment() {
                 publicPostsAdapter.notifyDataSetChanged()
                 publicPostsRecyclerView.adapter = publicPostsAdapter
             }
-            userPostsHeader.visibility = View.GONE
         }
     }
 
@@ -118,7 +98,6 @@ class HomeFragment : Fragment() {
 
         initializeDatabase()
         initializeAdapter(root)
-        userPostsHeader = root.findViewById(R.id.user_posts_header)
 
         val redirectButton: Button = root.findViewById(R.id.home_redirect_button)
         redirectButton.setOnClickListener {

@@ -27,7 +27,7 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         val item = gratitudeItems[position]
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
         holder.itemDescription.text = item.content
-        holder.itemLocation.text = item.location ?: "Unknown"
+        holder.authorUsername.text = item.userId.toString() // TODO: update to display username
         holder.itemPostDate.text = dateFormat.format(item.postDateTime.time)
         holder.itemLastUpdateDate.text =
             "Updated: ${dateFormat.format(item.lastUpdateDateTime.time)}"
@@ -38,8 +38,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         if (item.image == null) {
             holder.itemImage.visibility = View.GONE
         }
-
-
     }
 
     override fun getItemCount(): Int {
@@ -55,7 +53,7 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemImage: ImageView = itemView.findViewById(R.id.itemImage)
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
-        val itemLocation: TextView = itemView.findViewById(R.id.itemLocation)
+        val authorUsername: TextView = itemView.findViewById(R.id.authorUsername)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)
         val itemLastUpdateDate: TextView = itemView.findViewById(R.id.itemLastUpdateDate)
         val itemNumberOfLikes: TextView = itemView.findViewById(R.id.itemNumberOfLikes)
