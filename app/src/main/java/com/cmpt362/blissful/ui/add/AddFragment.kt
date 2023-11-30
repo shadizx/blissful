@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -53,6 +54,7 @@ class AddFragment : Fragment() {
     private lateinit var intent: Intent
     private lateinit var tempImgFile: File
     private lateinit var imageView: ImageView
+    private lateinit var publicToggleSwitch: Switch
 
     private val tempImgFileName = "temp_image.jpg"
 
@@ -86,6 +88,10 @@ class AddFragment : Fragment() {
         repository = PostRepository(databaseDao)
         viewModelFactory = PostViewModelFactory(repository)
         postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
+        publicToggleSwitch = binding.publicToggleSwitch
+        publicToggleSwitch.setOnCheckedChangeListener { _, isChecked ->
+            addViewModel.isPublic.value = isChecked
+        }
 
         // temp file to store user selected image
         tempImgFile =
@@ -145,7 +151,12 @@ class AddFragment : Fragment() {
             } else {
                 // Resetting back to placeholder image
                 imageView = binding.imageView
-                imageView.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.photo_icon))
+                imageView.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        requireContext(),
+                        R.drawable.photo_icon
+                    )
+                )
             }
         }
 
@@ -212,37 +223,41 @@ class AddFragment : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         } else {
-            val postText = postTextView.text.toString()
+            val postText = postTextView.text.toString().trim()
+
             if (postText.isNotEmpty()) {
+                val isPublic = addViewModel.isPublic.value ?: false
 
-                var post =
-                    Post(
-                        userId = userId,
-                        content = postText,
-                        location = "",
-                    )
+                val defaultPost = Post(
+                    userId = userId,
+                    content = postText,
+                    location = null,
+                    isPublic = isPublic
+                )
 
-                if (addViewModel.newImage.value!= null) {
-
+                val post = if (addViewModel.newImage.value != null) {
                     try {
-                        post =
-                            addViewModel.newImage.value?.let {
-                                Post(
-                                    userId = userId,
-                                    content = postText,
-                                    location = "",
-                                    image = it,
-                                )
-                            }!!
+                        val image = addViewModel.newImage.value
+                        Post(
+                            userId = userId,
+                            content = postText,
+                            location = null,
+                            image = image,
+                            isPublic = isPublic
+                        )
                     } catch (e: Exception) {
                         Log.e(ContentValues.TAG, "File not saved: ", e)
+                        defaultPost
                     }
-
-
+                } else {
+                    defaultPost
                 }
                 postViewModel.insert(post)
                 postTextView.text.clear()
                 Toast.makeText(requireContext(), "Post submitted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Please enter a post text", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }

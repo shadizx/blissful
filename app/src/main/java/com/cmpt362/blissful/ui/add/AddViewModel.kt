@@ -6,10 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class AddViewModel : ViewModel() {
-
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is add Fragment"
+    var isPublic = MutableLiveData<Boolean>().apply {
+        value = true
     }
-    val text: LiveData<String> = _text
     var newImage = MutableLiveData<Bitmap>()
 }
