@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "912251898419",
+    "project_id": "blissful-55fae",
+    "storage_bucket": "blissful-55fae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912251898419:android:9b70a4e18da47591877146",
+        "android_client_info": {
+          "package_name": "com.cmpt362.blissful"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "912251898419-mhtp2pii20lmp13fb7alsr1g4vdbmn8b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cmpt362.blissful",
+            "certificate_hash": "5c3460a996a9e71574822f51cbe84bd10cee166f"
+          }
+        },
+        {
+          "client_id": "912251898419-c4e8eus73038afgi03atlmd60fnogl0l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwQxiOdC6SYF_WVryli_RuKfAhcV_Ykdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "912251898419-c4e8eus73038afgi03atlmd60fnogl0l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
