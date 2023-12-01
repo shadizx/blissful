@@ -19,6 +19,13 @@ data class Post(
     @ColumnInfo(name = "userId")
     val userId: String,
 
+    /**
+     * In Room, when we use a String type for a column, it corresponds to the TEXT data type in SQLite (which is Room's DB engine).
+     * SQLite's TEXT data type does not require a size limit to be defined like VARCHAR in MySQL.
+     * However, when implementing the logic of posts content, it is better to set a word limit (500 words?... etc).
+     * This suggestion is to ensure the storage and displaying of the post content data can be done properly.
+     */
+
     @ColumnInfo(name = "content")
     val content: String,
 
