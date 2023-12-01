@@ -257,12 +257,12 @@ class ProfileFragment : Fragment() {
                         val editor = sharedPreferences.edit()
                         editor.putString("userId", userId)
                         editor.apply()
-                    } else {
-                        Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT)
-                            .show()
-                        onSignedIn(user?.displayName.toString())
                     }
                 }
+            } else {
+                Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT)
+                    .show()
+                onSignedIn(user?.displayName.toString())
             }
         }
     }
