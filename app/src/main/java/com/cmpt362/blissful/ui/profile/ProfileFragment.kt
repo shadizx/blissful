@@ -2,6 +2,7 @@ package com.cmpt362.blissful.ui.profile
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -78,14 +79,19 @@ class ProfileFragment : Fragment() {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // Initialize Database Variables
         initializeFirebaseAuth()
         initializeUserViewModel()
         initializeRoomDatabase()
-        setUpGoogle()
 
         viewFlipper = root.findViewById(R.id.view_flipper)
         getCredentials()
         setUpPage()
+        setUpGoogle()
+
+
+        requireActivity().getSharedPreferences("user", 0)
+            .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
         settingsButton = root.findViewById(R.id.buttonSetting)
         settingsButton.setOnClickListener {
@@ -275,7 +281,14 @@ class ProfileFragment : Fragment() {
         _binding = null
     }
 
-    companion object {
-        private const val TAG = "ProfileFragment"
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            getCredentials()
+            setUpPage()
+        }
+
+    private companion object LoginActivity {
+        private const val TAG = "LoginActivity"
     }
+
 }
