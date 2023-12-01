@@ -19,10 +19,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.cmpt362.blissful.MainActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentProfileBinding
 import com.cmpt362.blissful.db.LocalRoomDatabase
 import com.cmpt362.blissful.db.user.User
+import com.cmpt362.blissful.db.post.Post
+import com.cmpt362.blissful.db.post.PostDatabaseDao
+import com.cmpt362.blissful.db.post.PostRepository
+import com.cmpt362.blissful.db.post.PostViewModel
+import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.user.UserDatabaseDao
 import com.cmpt362.blissful.db.user.UserRepository
 import com.cmpt362.blissful.db.user.UserViewModel
@@ -39,15 +46,26 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.cmpt362.blissful.ui.home.GratitudeAdapter
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
     private lateinit var database: LocalRoomDatabase
-    private lateinit var databaseDao: UserDatabaseDao
-    private lateinit var repository: UserRepository
-    private lateinit var viewModelFactory: UserViewModelFactory
+    private lateinit var userDatabaseDao: UserDatabaseDao
+    private lateinit var userRepository: UserRepository
+    private lateinit var userViewModelFactory: UserViewModelFactory
     private lateinit var userViewModel: UserViewModel
+
+    private lateinit var postsDatabaseDao: PostDatabaseDao
+    private lateinit var postsRepository: PostRepository
+    private lateinit var postsViewModelFactory: PostViewModelFactory
+    private lateinit var postViewModel: PostViewModel
+
+    // user posts
+    private lateinit var userPostsArrayList: ArrayList<Post>
+    private lateinit var userPostsAdapter: GratitudeAdapter
+    private lateinit var userPostsRecyclerView: RecyclerView
 
     private lateinit var viewFlipper: ViewFlipper
     private lateinit var settingsButton: ImageButton
@@ -154,10 +172,32 @@ class ProfileFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val username = repository.getUsernameForUserId(userId)
+            val username = userRepository.getUsernameForUserId(userId)
             val data = "Hello, $username!"
             profileText.text = data
         }
+
+        initializeAdapter()
+        updateDisplayedPosts()
+    }
+
+    private fun updateDisplayedPosts() {
+        lifecycleScope.launch {
+            postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) {
+                userPostsAdapter.setData(it)
+                userPostsAdapter.notifyDataSetChanged()
+                userPostsRecyclerView.adapter = userPostsAdapter
+            }
+        }
+    }
+
+    private fun initializeAdapter() {
+        userPostsRecyclerView = viewFlipper.findViewById(R.id.user_posts)
+        userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        userPostsArrayList = ArrayList()
+        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
+        userPostsRecyclerView.adapter = userPostsAdapter
+        userPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
     private fun setUpSignedOutPage() {
@@ -183,10 +223,16 @@ class ProfileFragment : Fragment() {
 
     private fun setupDatabase() {
         database = LocalRoomDatabase.getInstance(requireContext())
-        databaseDao = database.userDatabaseDao
-        repository = UserRepository(databaseDao)
-        viewModelFactory = UserViewModelFactory(repository)
-        userViewModel = ViewModelProvider(this, viewModelFactory)[UserViewModel::class.java]
+
+        userDatabaseDao = database.userDatabaseDao
+        userRepository = UserRepository(userDatabaseDao)
+        userViewModelFactory = UserViewModelFactory(userRepository)
+        userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
+
+        postsDatabaseDao = database.postDatabaseDao
+        postsRepository = PostRepository(postsDatabaseDao)
+        postsViewModelFactory = PostViewModelFactory(postsRepository)
+        postViewModel = ViewModelProvider(this, postsViewModelFactory)[PostViewModel::class.java]
     }
 
     override fun onDestroyView() {
