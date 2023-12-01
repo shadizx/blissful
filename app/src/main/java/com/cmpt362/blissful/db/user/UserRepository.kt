@@ -47,4 +47,13 @@ class UserRepository(private val db: FirebaseFirestore) {
         val doc = db.collection("users").document(userId).get().await()
         return doc.toObject<User>()?.username
     }
+
+    suspend fun getProfileImgUrlByUserId(userId: String): String? {
+        val docSnapshot = db.collection("users").document(userId).get().await()
+        return docSnapshot.getString("profileImgUrl")
+    }
+
+    suspend fun updateProfileImgUrl(userId: String, newUrl: String) {
+        db.collection("users").document(userId).update("profileImgUrl", newUrl).await()
+    }
 }

@@ -7,7 +7,9 @@ data class User(
 
     var username: String = "",
 
-    var password: String = ""
+    var password: String = "",
+
+    var profileImgUrl: String = "",
 ) {
     constructor() : this("", "", "")
 
@@ -15,7 +17,8 @@ data class User(
     fun toMap(): Map<String, Any> {
         return mapOf(
             "username" to username,
-            "password" to password
+            "password" to password,
+            "profileImgUrl" to profileImgUrl
         )
     }
 }
