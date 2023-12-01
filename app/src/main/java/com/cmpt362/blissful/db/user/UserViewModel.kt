@@ -52,6 +52,21 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
         return usernameLiveData
     }
+
+    fun getProfileImgUrlByUserId(userId: String): LiveData<String?> {
+        val liveData = MutableLiveData<String?>()
+        viewModelScope.launch {
+            val url = repository.getProfileImgUrlByUserId(userId)
+            liveData.postValue(url)
+        }
+        return liveData
+    }
+
+    fun updateProfileImgUrl(userId: String, newUrl: String) {
+        viewModelScope.launch {
+            repository.updateProfileImgUrl(userId, newUrl)
+        }
+    }
 }
 
 class UserViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
