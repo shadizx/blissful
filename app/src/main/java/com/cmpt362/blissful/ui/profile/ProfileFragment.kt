@@ -168,10 +168,11 @@ class ProfileFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            userViewModel.getUsernameForUserId(userId.toString()).observe(viewLifecycleOwner) { username ->
-                val data = "Hello, $username!"
-                profileText.text = data
-            }
+            userViewModel.getUsernameForUserId(userId.toString())
+                .observe(viewLifecycleOwner) { username ->
+                    val data = "Hello, $username!"
+                    profileText.text = data
+                }
         }
 
         initializeAdapter()
@@ -232,17 +233,40 @@ class ProfileFragment : Fragment() {
             }
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        auth.currentUser
+    }
+
     private fun signUpUser(user: FirebaseUser?) {
         val username = user?.displayName ?: ""
         userViewModel.checkUserForLogin(username, "").observe(viewLifecycleOwner) { exists ->
             if (!exists) {
                 val newUser = User(username = username)
                 userViewModel.insert(newUser).observe(viewLifecycleOwner) { userId ->
-                    // Handle new user creation
+                    if (userId != null) {
+                        val sharedPreferences =
+                            requireActivity().getSharedPreferences("user", 0)
+                        val editor = sharedPreferences.edit()
+                        editor.putString("userId", userId)
+                        editor.apply()
+                    } else {
+                        Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT)
+                            .show()
+                        onSignedIn(user?.displayName.toString())
+                    }
                 }
-            } else {
-                // Handle existing user
             }
+        }
+    }
+
+    private fun onSignedIn(username: String) {
+        userViewModel.getIdForUser(username).observe(viewLifecycleOwner) { id ->
+            val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
+            val editor = sharedPreferences.edit()
+            editor.putString("userId", id)
+            editor.apply()
         }
     }
 
@@ -250,8 +274,6 @@ class ProfileFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    // ... Additional functions as needed
 
     companion object {
         private const val TAG = "ProfileFragment"
