@@ -1,48 +1,56 @@
 package com.cmpt362.blissful.db.user
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
-    private val allUsersLiveData: LiveData<List<User>> = repository.allUsers.asLiveData()
 
-    fun insert(user: User): LiveData<Int> {
-        val id = MutableLiveData<Int>()
+    val allUsersLiveData: LiveData<List<User>> = repository.allUsers.asLiveData()
+
+    fun insert(user: User): LiveData<String> {
+        val userIdLiveData = MutableLiveData<String>()
         viewModelScope.launch(Dispatchers.IO) {
-            id.postValue(repository.insert(user))
+            val userId = repository.insert(user)
+            userIdLiveData.postValue(userId)
         }
-        return id
+        return userIdLiveData
     }
 
     fun checkUserForLogin(username: String, password: String): LiveData<Boolean> {
-        val isUserExist = MutableLiveData<Boolean>()
-        viewModelScope.launch {
-            isUserExist.value = repository.isUserExist(username, password)
+        val isUserExistLiveData = MutableLiveData<Boolean>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val isUserExist = repository.isUserExist(username, password)
+            isUserExistLiveData.postValue(isUserExist)
         }
-        return isUserExist
+        return isUserExistLiveData
     }
 
     fun checkIsUsernameTaken(username: String): LiveData<Boolean> {
-        val isUsernameTaken = MutableLiveData<Boolean>()
-        viewModelScope.launch {
-            isUsernameTaken.value = repository.isUsernameTaken(username)
+        val isUsernameTakenLiveData = MutableLiveData<Boolean>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val isUsernameTaken = repository.isUsernameTaken(username)
+            isUsernameTakenLiveData.postValue(isUsernameTaken)
         }
-        return isUsernameTaken
+        return isUsernameTakenLiveData
     }
 
-    fun getIdForUser(username: String): LiveData<Int> {
-        val id = MutableLiveData<Int>()
-        viewModelScope.launch {
-            id.value = repository.getIdForUser(username)
+    fun getIdForUser(username: String): LiveData<String> {
+        val idLiveData = MutableLiveData<String>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val id = repository.getIdForUser(username)
+            idLiveData.postValue(id)
         }
-        return id
+        return idLiveData
+    }
+
+    fun getUsernameForUserId(userId: String): LiveData<String?> {
+        val usernameLiveData = MutableLiveData<String?>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val username = repository.getUsernameForUserId(userId)
+            usernameLiveData.postValue(username)
+        }
+        return usernameLiveData
     }
 }
 

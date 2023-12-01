@@ -216,7 +216,7 @@ class AddFragment : Fragment() {
 
     private fun submitPost() {
         val userId = getUserId(requireContext())
-        if (userId == -1) {
+        if (userId == null || userId == "") {
             Toast.makeText(
                 requireContext(),
                 "Please sign in to submit a post",

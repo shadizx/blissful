@@ -13,10 +13,10 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
 
     val allPublicPosts: LiveData<List<Post>> = repository.getAllPosts().asLiveData()
 
-    fun getPostsByUserId(userId: Int): LiveData<List<Post>> =
+    fun getPostsByUserId(userId: String): LiveData<List<Post>> =
         repository.getPostsByUserId(userId).asLiveData()
 
-    fun getPostsWithoutUserId(userId: Int): LiveData<List<Post>> =
+    fun getPostsWithoutUserId(userId: String): LiveData<List<Post>> =
         repository.getPostsWithoutUserId(userId).asLiveData()
 
     fun getPostById(postId: Int): LiveData<Post> = repository.getPostById(postId).asLiveData()
