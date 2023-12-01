@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
     private lateinit var publicPostsRecyclerView: RecyclerView
 
     // Logged in state
-    private var userId: Int = -1
+    private var userId: String = ""
     private var isSignedIn: Boolean = false
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
@@ -88,7 +88,7 @@ class HomeFragment : Fragment() {
 
     private fun getCredentials() {
         userId = getUserId(requireContext())
-        isSignedIn = userId != -1
+        isSignedIn = userId != ""
     }
 
     private fun updateDisplayedPosts() {

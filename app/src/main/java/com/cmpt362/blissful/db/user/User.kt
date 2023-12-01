@@ -1,17 +1,21 @@
 package com.cmpt362.blissful.db.user
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.google.firebase.firestore.Exclude
 
-@Entity(tableName = "user_table")
 data class User(
-    @PrimaryKey(autoGenerate = true)
-    var userId: Int = 0,
+    @get:Exclude var userId: String = "",
 
-    @ColumnInfo(name = "username")
     var username: String = "",
 
-    @ColumnInfo(name = "password")
-    var password: String = "",
-)
+    var password: String = ""
+) {
+    constructor() : this("", "", "")
+
+    // Convert User object to Firebase
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "username" to username,
+            "password" to password
+        )
+    }
+}

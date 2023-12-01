@@ -6,15 +6,15 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 
-fun getUserId(context: Context): Int {
+fun getUserId(context: Context): String {
     val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
-    return sharedPref.getInt("userId", -1)
+    return sharedPref.getString("userId", "") ?: ""
 }
 
 fun signOut(context: Context) {
     val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
     with(sharedPref.edit()) {
-        putInt("userId", -1)
+        putString("userId", "")
         apply()
     }
 }

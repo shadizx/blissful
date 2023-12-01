@@ -13,10 +13,10 @@ class PostRepository(private val postDatabaseDao: PostDatabaseDao) {
 
     fun getAllPosts(): Flow<List<Post>> = postDatabaseDao.getAllPosts()
 
-    fun getPostsByUserId(userId: Int): Flow<List<Post>> =
+    fun getPostsByUserId(userId: String): Flow<List<Post>> =
         postDatabaseDao.getAllPostsByUserId(userId)
 
-    fun getPostsWithoutUserId(userId: Int): Flow<List<Post>> =
+    fun getPostsWithoutUserId(userId: String): Flow<List<Post>> =
         postDatabaseDao.getAllPostsWithoutUserId(userId)
 
     fun getPostById(postId: Int): Flow<Post> = postDatabaseDao.getPostById(postId)

@@ -2,7 +2,6 @@ package com.cmpt362.blissful.ui.profile
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.cmpt362.blissful.MainActivity
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentProfileBinding
 import com.cmpt362.blissful.db.LocalRoomDatabase
@@ -30,7 +28,6 @@ import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.user.User
-import com.cmpt362.blissful.db.user.UserDatabaseDao
 import com.cmpt362.blissful.db.user.UserRepository
 import com.cmpt362.blissful.db.user.UserViewModel
 import com.cmpt362.blissful.db.user.UserViewModelFactory
@@ -47,22 +44,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
-    private lateinit var database: LocalRoomDatabase
-    private lateinit var userDatabaseDao: UserDatabaseDao
-    private lateinit var userRepository: UserRepository
-    private lateinit var userViewModelFactory: UserViewModelFactory
     private lateinit var userViewModel: UserViewModel
-
-    private lateinit var postsDatabaseDao: PostDatabaseDao
-    private lateinit var postsRepository: PostRepository
-    private lateinit var postsViewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
-    // user posts
+    private lateinit var database: LocalRoomDatabase
+    private lateinit var postsDatabaseDao: PostDatabaseDao
+
     private lateinit var userPostsArrayList: ArrayList<Post>
     private lateinit var userPostsAdapter: GratitudeAdapter
     private lateinit var userPostsRecyclerView: RecyclerView
@@ -73,34 +65,27 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
-    private var userId: Int = -1
+    private var userId: String = ""
     private var isSignedIn: Boolean = false
-    private val preferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-            getCredentials()
-            setUpPage()
-        }
-
-    private companion object LoginActivity {
-        private const val TAG = "LoginActivity"
-    }
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var googleActivityLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        initializeFirebaseAuth()
+        initializeUserViewModel()
+        initializeRoomDatabase()
+        setUpGoogle()
+
         viewFlipper = root.findViewById(R.id.view_flipper)
         getCredentials()
         setUpPage()
-        setUpGoogle()
-
-        requireActivity().getSharedPreferences("user", 0)
-            .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
         settingsButton = root.findViewById(R.id.buttonSetting)
         settingsButton.setOnClickListener {
@@ -111,22 +96,35 @@ class ProfileFragment : Fragment() {
         return root
     }
 
+    private fun initializeFirebaseAuth() {
+        auth = Firebase.auth
+    }
+
+    private fun initializeUserViewModel() {
+        val userRepository = UserRepository(FirebaseFirestore.getInstance())
+        val userViewModelFactory = UserViewModelFactory(userRepository)
+        userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
+    }
+
+    private fun initializeRoomDatabase() {
+        database = LocalRoomDatabase.getInstance(requireContext())
+        postsDatabaseDao = database.postDatabaseDao
+        val postRepository = PostRepository(postsDatabaseDao)
+        val postsViewModelFactory = PostViewModelFactory(postRepository)
+        postViewModel = ViewModelProvider(this, postsViewModelFactory)[PostViewModel::class.java]
+    }
+
     private fun setUpGoogle() {
-        setupDatabase()
         setGoogleLogin()
         googleActivityLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
             if (result.resultCode == Activity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
-                    // Google Sign In was successful, authenticate with Firebase
                     val account = task.getResult(ApiException::class.java)!!
-                    Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
                     firebaseAuthWithGoogle(account.idToken!!)
                 } catch (e: ApiException) {
-                    // Google Sign In failed, update UI appropriately
                     Log.w(TAG, "Google sign in failed", e)
                 }
             }
@@ -137,17 +135,16 @@ class ProfileFragment : Fragment() {
         // Initialize Firebase Auth
         auth = Firebase.auth
 
-        val gso =
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
     }
 
     private fun getCredentials() {
         userId = getUserId(requireContext())
-        isSignedIn = userId != -1
+        isSignedIn = userId != ""
     }
 
     private fun setUpPage() {
@@ -161,7 +158,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setUpSignedInPage() {
-        setupDatabase()
         val signOutButton: Button = viewFlipper.findViewById(R.id.sign_out_button)
         val profileText: TextView = viewFlipper.findViewById(R.id.profile_text)
 
@@ -172,13 +168,23 @@ class ProfileFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val username = userRepository.getUsernameForUserId(userId)
-            val data = "Hello, $username!"
-            profileText.text = data
+            userViewModel.getUsernameForUserId(userId.toString()).observe(viewLifecycleOwner) { username ->
+                val data = "Hello, $username!"
+                profileText.text = data
+            }
         }
 
         initializeAdapter()
         updateDisplayedPosts()
+    }
+
+    private fun initializeAdapter() {
+        userPostsRecyclerView = viewFlipper.findViewById(R.id.user_posts)
+        userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        userPostsArrayList = ArrayList()
+        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
+        userPostsRecyclerView.adapter = userPostsAdapter
+        userPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
     private fun updateDisplayedPosts() {
@@ -189,15 +195,6 @@ class ProfileFragment : Fragment() {
                 userPostsRecyclerView.adapter = userPostsAdapter
             }
         }
-    }
-
-    private fun initializeAdapter() {
-        userPostsRecyclerView = viewFlipper.findViewById(R.id.user_posts)
-        userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        userPostsArrayList = ArrayList()
-        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
-        userPostsRecyclerView.adapter = userPostsAdapter
-        userPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
     private fun setUpSignedOutPage() {
@@ -221,84 +218,42 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun setupDatabase() {
-        database = LocalRoomDatabase.getInstance(requireContext())
-
-        userDatabaseDao = database.userDatabaseDao
-        userRepository = UserRepository(userDatabaseDao)
-        userViewModelFactory = UserViewModelFactory(userRepository)
-        userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
-
-        postsDatabaseDao = database.postDatabaseDao
-        postsRepository = PostRepository(postsDatabaseDao)
-        postsViewModelFactory = PostViewModelFactory(postsRepository)
-        postViewModel = ViewModelProvider(this, postsViewModelFactory)[PostViewModel::class.java]
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireActivity().getSharedPreferences("user", 0)
-            .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
-        _binding = null
-    }
-
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
                     signUpUser(user)
                 } else {
-                    Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT)
                         .show()
-                    Log.w(TAG, "user not signed in..")
-                    startActivity(Intent(requireContext(), MainActivity::class.java))
                 }
             }
     }
-
-    override fun onStart() {
-        super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
-        auth.currentUser
-    }
-
 
     private fun signUpUser(user: FirebaseUser?) {
-        userViewModel.checkUserForLogin(user?.displayName.toString(), "")
-            .observe(viewLifecycleOwner) { exists ->
-                // Check if the user exists, if yes send toast, if no create a new user
-                if (exists) {
-                    Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT)
-                        .show()
-                    onSignedIn(user?.displayName.toString())
-                } else {
-                    val newUser = User(username = user?.displayName.toString(), password = "")
-                    userViewModel.insert(newUser).observe(viewLifecycleOwner) { id ->
-                        if (id != null) {
-                            val sharedPreferences =
-                                requireActivity().getSharedPreferences("user", 0)
-                            val editor = sharedPreferences.edit()
-                            editor.putInt("userId", id)
-                            editor.apply()
-
-                        }
-                    }
+        val username = user?.displayName ?: ""
+        userViewModel.checkUserForLogin(username, "").observe(viewLifecycleOwner) { exists ->
+            if (!exists) {
+                val newUser = User(username = username)
+                userViewModel.insert(newUser).observe(viewLifecycleOwner) { userId ->
+                    // Handle new user creation
                 }
+            } else {
+                // Handle existing user
             }
+        }
     }
 
-    // Send flag that google login is successful to profile fragment
-    private fun onSignedIn(username: String) {
-        userViewModel.getIdForUser(username).observe(viewLifecycleOwner) { id ->
-            val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
-            val editor = sharedPreferences.edit()
-            editor.putInt("userId", id)
-            editor.apply()
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ... Additional functions as needed
+
+    companion object {
+        private const val TAG = "ProfileFragment"
     }
 }
