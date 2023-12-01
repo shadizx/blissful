@@ -22,7 +22,7 @@
         android:contentDescription="photo icon"
         android:minWidth="150dp"
         android:minHeight="150dp"
-        app:srcCompat="@drawable/image_icon" />
+        app:srcCompat="@drawable/photo_icon" />
 
     <Button
         android:id="@+id/photoSubmitButton"
@@ -53,11 +53,10 @@
         android:text="1000 characters"
         android:textSize="12sp" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/publicToggleSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="12dp"
         android:layout_marginHorizontal="20dp"
         android:text="Public Post"
         android:checked="true" />

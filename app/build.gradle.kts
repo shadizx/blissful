@@ -106,4 +106,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
     implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
     implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

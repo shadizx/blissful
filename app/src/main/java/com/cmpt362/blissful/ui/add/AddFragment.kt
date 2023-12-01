@@ -15,13 +15,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -35,12 +35,18 @@ import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.util.getBitmap
 import com.cmpt362.blissful.db.util.getUserId
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 
 
 class AddFragment : Fragment() {
@@ -54,7 +60,7 @@ class AddFragment : Fragment() {
     private lateinit var intent: Intent
     private lateinit var tempImgFile: File
     private lateinit var imageView: ImageView
-    private lateinit var publicToggleSwitch: Switch
+    private lateinit var publicToggleSwitch: SwitchCompat
 
     private val tempImgFileName = "temp_image.jpg"
 
@@ -72,17 +78,27 @@ class AddFragment : Fragment() {
     private lateinit var viewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
+    // Firebase
+    private val db = Firebase.firestore
+    private lateinit var auth: FirebaseAuth
+    private val storageRef = Firebase.storage.reference
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Firebase auth
+        auth = Firebase.auth
+
 
         addViewModel =
             ViewModelProvider(this)[AddViewModel::class.java]
 
         _binding = FragmentAddBinding.inflate(inflater, container, false)
+
+        // Room Database
         database = LocalRoomDatabase.getInstance(requireContext())
         databaseDao = database.postDatabaseDao
         repository = PostRepository(databaseDao)
@@ -110,6 +126,7 @@ class AddFragment : Fragment() {
             showAlertDialog()
         }
 
+        // Receiving result from Camera and Gallery Intents
         cameraResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
         { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -157,11 +174,19 @@ class AddFragment : Fragment() {
                         R.drawable.photo_icon
                     )
                 )
+                imageView.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        requireContext(),
+                        R.drawable.photo_icon
+                    )
+                )
             }
         }
 
         postTextView = binding.postInput
         submitButton = binding.submitButton
+
+        // Submitting user entry
         submitButton.setOnClickListener {
             submitPost()
             addViewModel.newImage.value = null
@@ -175,6 +200,7 @@ class AddFragment : Fragment() {
         _binding = null
     }
 
+    // Dialog for image selection
     private fun showAlertDialog() {
         val pictureDialogItems = arrayOf("Select photo from Gallery", "Capture photo from Camera")
         activity?.let {
@@ -214,6 +240,7 @@ class AddFragment : Fragment() {
 
     }
 
+
     private fun submitPost() {
         val userId = getUserId(requireContext())
         if (userId == -1) {
@@ -224,16 +251,15 @@ class AddFragment : Fragment() {
             ).show()
         } else {
             val postText = postTextView.text.toString().trim()
-
+            val isPublic = addViewModel.isPublic.value ?: false
             if (postText.isNotEmpty()) {
-                val isPublic = addViewModel.isPublic.value ?: false
 
-                val defaultPost = Post(
-                    userId = userId,
-                    content = postText,
-                    location = null,
-                    isPublic = isPublic
-                )
+                val defaultPost =
+                    Post(
+                        userId = userId,
+                        content = postText,
+                        location = "",
+                    )
 
                 val post = if (addViewModel.newImage.value != null) {
                     try {
@@ -243,7 +269,6 @@ class AddFragment : Fragment() {
                             content = postText,
                             location = null,
                             image = image,
-                            isPublic = isPublic
                         )
                     } catch (e: Exception) {
                         Log.e(ContentValues.TAG, "File not saved: ", e)
@@ -252,9 +277,44 @@ class AddFragment : Fragment() {
                 } else {
                     defaultPost
                 }
+
+
                 postViewModel.insert(post)
                 postTextView.text.clear()
                 Toast.makeText(requireContext(), "Post submitted", Toast.LENGTH_SHORT).show()
+
+                // Adding data to firebase storage
+                val currentUser = auth.currentUser
+                if (isPublic) {
+                    // Save data in firebase storage
+                    // extract the file name with extension
+                    // Image name format: Random_generated_string.jpg
+
+                    val sd =
+                        "${UUID.randomUUID()}.jpg"
+
+                    // Upload Task with upload to directory 'file'
+                    // and name of the file remains same
+                    val uploadTask = storageRef.child("file/$sd").putFile(tempImgUri)
+                    // On success, download the file URL and display it
+                    uploadTask.addOnSuccessListener {
+                        Log.e("Firebase", "Image Upload passed")
+                    }.addOnFailureListener {
+                        Log.e("Firebase", "Image Upload fail")
+                    }
+
+                    // Save data in firestore
+                    val nestedData: MutableMap<String, Any> = HashMap()
+                    if (currentUser != null) {
+                        nestedData["entryName"] = currentUser.displayName.toString()
+                    } else {
+                        // TODO : change to user name
+                        nestedData["entryName"] = userId.toString()
+                    }
+                    nestedData["data"] = sd //postText +
+                    db.collection("entries").document("test")
+                        .set(nestedData)
+                }
             } else {
                 Toast.makeText(requireContext(), "Please enter a post text", Toast.LENGTH_SHORT)
                     .show()
