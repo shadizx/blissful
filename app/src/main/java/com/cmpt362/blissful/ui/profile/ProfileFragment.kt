@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ViewFlipper
@@ -181,8 +182,54 @@ class ProfileFragment : Fragment() {
                 }
         }
 
+        // Update achievements
+        lifecycleScope.launch {
+            postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) { posts ->
+                val numPosts = posts.size
+                updateAchievementComponent(numPosts)
+            }
+        }
+
+        // Update profile "Posts" and "Points" values
+        postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) { posts ->
+            val numPosts = posts.size
+
+            // Update the "num_posts" TextView
+            val numPostsTextView: TextView = viewFlipper.findViewById(R.id.num_posts)
+            numPostsTextView.text = "Posts: $numPosts"
+
+            // Update the "num_points" TextView based on your chosen metric
+            val numPoints = numPosts * 25
+            val numPointsTextView: TextView = viewFlipper.findViewById(R.id.num_points)
+            numPointsTextView.text = "Points: $numPoints"
+        }
+
         initializeAdapter()
         updateDisplayedPosts()
+    }
+
+    private fun updateAchievementComponent(numPosts: Int) {
+        val firstPostProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.first_post_progressbar)
+        val tenPostsProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.ten_posts_progressbar)
+        val firstPostText = viewFlipper.findViewById<TextView>(R.id.first_post_text)
+        val tenPostsText = viewFlipper.findViewById<TextView>(R.id.ten_posts_text)
+
+        // Update progress bars and text views based on the number of posts
+        if (numPosts >= 1) {
+            firstPostProgressBar.progress = 100
+            firstPostText.text = "Complete!"
+        } else {
+            firstPostProgressBar.progress = 0
+            firstPostText.text = "Progress: $numPosts/1"
+        }
+
+        if (numPosts >= 10) {
+            tenPostsProgressBar.progress = 100
+            tenPostsText.text = "Complete!"
+        } else {
+            tenPostsProgressBar.progress = (numPosts / 10.0 * 100).toInt()
+            tenPostsText.text = "Progress: $numPosts/10"
+        }
     }
 
     private fun initializeAdapter() {

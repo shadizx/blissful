@@ -98,7 +98,7 @@
                 android:id="@+id/achievementHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Achievement 1"
+                android:text="Create an account"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Progress"
+                android:text="Complete!"
                 android:textSize="14sp" />
 
             <ProgressBar
@@ -117,7 +117,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:max="100"
-                android:progress="50" />
+                android:progress="100" />
         </LinearLayout>
 
         <LinearLayout
@@ -129,11 +129,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Achievement 2"
+                android:text="Make your first post"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/first_post_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -142,11 +143,43 @@
 
             <ProgressBar
                 style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/first_post_progressbar"
                 android:layout_width="350dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:max="100"
-                android:progress="70" />
+                android:progress="0" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Make 10 posts"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/ten_posts_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Progress"
+                android:textSize="14sp" />
+
+            <ProgressBar
+                android:id="@+id/ten_posts_progressbar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:max="100"
+                android:progress="0" />
         </LinearLayout>
 
         <TextView
