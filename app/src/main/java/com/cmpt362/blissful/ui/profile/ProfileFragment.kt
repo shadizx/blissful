@@ -22,9 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentProfileBinding
-import com.cmpt362.blissful.db.LocalRoomDatabase
 import com.cmpt362.blissful.db.post.Post
-import com.cmpt362.blissful.db.post.PostDatabaseDao
 import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
@@ -52,13 +50,13 @@ class ProfileFragment : Fragment() {
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var postViewModel: PostViewModel
-
-    private lateinit var database: LocalRoomDatabase
-    private lateinit var postsDatabaseDao: PostDatabaseDao
+    private lateinit var userRepository: UserRepository
 
     private lateinit var userPostsArrayList: ArrayList<Post>
     private lateinit var userPostsAdapter: GratitudeAdapter
     private lateinit var userPostsRecyclerView: RecyclerView
+
+    private lateinit var viewModelFactory: PostViewModelFactory
 
     private lateinit var viewFlipper: ViewFlipper
     private lateinit var settingsButton: ImageButton
@@ -82,13 +80,12 @@ class ProfileFragment : Fragment() {
         // Initialize Database Variables
         initializeFirebaseAuth()
         initializeUserViewModel()
-        initializeRoomDatabase()
+        initializeRepository()
 
         viewFlipper = root.findViewById(R.id.view_flipper)
         getCredentials()
         setUpPage()
         setUpGoogle()
-
 
         requireActivity().getSharedPreferences("user", 0)
             .registerOnSharedPreferenceChangeListener(preferenceChangeListener)
@@ -112,12 +109,11 @@ class ProfileFragment : Fragment() {
         userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
     }
 
-    private fun initializeRoomDatabase() {
-        database = LocalRoomDatabase.getInstance(requireContext())
-        postsDatabaseDao = database.postDatabaseDao
-        val postRepository = PostRepository(postsDatabaseDao)
-        val postsViewModelFactory = PostViewModelFactory(postRepository)
-        postViewModel = ViewModelProvider(this, postsViewModelFactory)[PostViewModel::class.java]
+    private fun initializeRepository() {
+        userRepository = UserRepository(FirebaseFirestore.getInstance())
+        val postRepository = PostRepository(FirebaseFirestore.getInstance())
+        viewModelFactory = PostViewModelFactory(postRepository)
+        postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
     }
 
     private fun setUpGoogle() {
@@ -142,9 +138,7 @@ class ProfileFragment : Fragment() {
         auth = Firebase.auth
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+            .requestIdToken(getString(R.string.default_web_client_id)).requestEmail().build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
     }
 
@@ -227,8 +221,7 @@ class ProfileFragment : Fragment() {
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(requireActivity()) { task ->
+        auth.signInWithCredential(credential).addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     signUpUser(user)
@@ -252,16 +245,14 @@ class ProfileFragment : Fragment() {
                 val newUser = User(username = username)
                 userViewModel.insert(newUser).observe(viewLifecycleOwner) { userId ->
                     if (userId != null) {
-                        val sharedPreferences =
-                            requireActivity().getSharedPreferences("user", 0)
+                        val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
                         val editor = sharedPreferences.edit()
                         editor.putString("userId", userId)
                         editor.apply()
                     }
                 }
             } else {
-                Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT).show()
                 onSignedIn(user?.displayName.toString())
             }
         }

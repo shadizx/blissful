@@ -1,42 +1,63 @@
 package com.cmpt362.blissful.db.post
+
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 
-/**
- * Splitting repositories and DAOs for each table (e.g., User and Post) enhances the maintainability and clarity of the code.
- * Each repository and DAO focuses on each table.
- * This separation allows for more organized and manageable code, and also increases the scalability of the project.
- * This approach is also considered a common best practices especially for large Android Project.
- */
+class PostRepository(private val db: FirebaseFirestore) {
 
-class PostRepository(private val postDatabaseDao: PostDatabaseDao) {
+    val allPosts: Flow<List<Post>> = flow {
+        val snapshot = db.collection("posts").get().await()
+        emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
+    }
 
-    fun getAllPosts(): Flow<List<Post>> = postDatabaseDao.getAllPosts()
+    fun getPublicPosts(): Flow<List<Post>> = flow {
+        val snapshot = db.collection("posts").whereEqualTo("isPublic", true).get().await()
+        emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
+    }
 
-    fun getPostsByUserId(userId: String): Flow<List<Post>> =
-        postDatabaseDao.getAllPostsByUserId(userId)
+    fun getPostsByUserId(userId: String): Flow<List<Post>> = flow {
+        val snapshot = db.collection("posts").whereEqualTo("userId", userId).get().await()
+        emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
+    }
 
-    fun getPostsWithoutUserId(userId: String): Flow<List<Post>> =
-        postDatabaseDao.getAllPostsWithoutUserId(userId)
+    fun getPostsWithoutUserId(userId: String): Flow<List<Post>> = flow {
+        val snapshot = db.collection("posts").whereNotEqualTo("userId", userId).whereEqualTo("isPublic", true).get().await()
+        emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
+    }
 
-    fun getPostById(postId: Int): Flow<Post> = postDatabaseDao.getPostById(postId)
+    fun getPostById(postId: String): Flow<Post?> = flow {
+        val docSnapshot = db.collection("posts").document(postId).get().await()
+        emit(docSnapshot.toObject<Post>())
+    }
 
-    fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): Flow<List<Post>> =
-        postDatabaseDao.getPostsBetweenPostTime(startTime, endTime)
+    fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): Flow<List<Post>> = flow {
+        val snapshot = db.collection("posts")
+            .whereGreaterThanOrEqualTo("postDateTime", startTime.timeInMillis)
+            .whereLessThanOrEqualTo("postDateTime", endTime.timeInMillis)
+            .get().await()
 
-    suspend fun insert(post: Post) {
-        postDatabaseDao.insertPost(post)
+        emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
+    }
+
+    suspend fun insert(post: Post): String {
+        val docRef = db.collection("posts").add(post.toMap()).await()
+        return docRef.id // Firebase generates a unique ID for the post
     }
 
     suspend fun update(post: Post) {
-        postDatabaseDao.updatePost(post)
+        db.collection("posts").document(post.postId).set(post.toMap()).await()
     }
 
-    suspend fun delete(id: Int) {
-        postDatabaseDao.deletePost(id)
+    suspend fun delete(postId: String) {
+        db.collection("posts").document(postId).delete().await()
     }
 
     suspend fun deleteAll() {
-        postDatabaseDao.deleteAll()
+        val snapshot = db.collection("posts").get().await()
+        snapshot.documents.forEach { doc -> db.collection("posts").document(doc.id).delete() }
     }
 }

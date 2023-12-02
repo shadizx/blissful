@@ -1,8 +1,6 @@
 package com.cmpt362.blissful.ui.home
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.opengl.Visibility
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.db.post.Post
+import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -26,18 +25,21 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = gratitudeItems[position]
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
+
         holder.itemDescription.text = item.content
         holder.authorUsername.text = item.userId.toString() // TODO: update to display username
-        holder.itemPostDate.text = dateFormat.format(item.postDateTime.time)
-        holder.itemLastUpdateDate.text =
-            "Updated: ${dateFormat.format(item.lastUpdateDateTime.time)}"
+        holder.itemPostDate.text = dateFormat.format(item.postDateTime)
         holder.itemNumberOfLikes.text = item.likesCount.toString()
-        // setting up the image, gone if text only, visible if text and image present
-        holder.itemImage.setImageBitmap(item.image)
-        holder.itemImage.visibility = View.VISIBLE
-        if (item.image == null) {
+
+        // Load the image using Picasso
+        if (item.imageUrl != null && item.imageUrl!!.isNotEmpty()) {
+            Log.d("ImageUrl", item.imageUrl!!)
+            Picasso.get().load(item.imageUrl).into(holder.itemImage)
+            holder.itemImage.visibility = View.VISIBLE
+        } else {
             holder.itemImage.visibility = View.GONE
         }
+
     }
 
     override fun getItemCount(): Int {
@@ -55,7 +57,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
         val authorUsername: TextView = itemView.findViewById(R.id.authorUsername)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)
-        val itemLastUpdateDate: TextView = itemView.findViewById(R.id.itemLastUpdateDate)
         val itemNumberOfLikes: TextView = itemView.findViewById(R.id.itemNumberOfLikes)
     }
 }

@@ -7,11 +7,10 @@ import java.util.Calendar
 
 class PostViewModel(private val repository: PostRepository) : ViewModel() {
 
-    /**
-     * For queries returning Flow object, we don't need to make them run in coroutines as they are already doing so and run asynchronously.
-     */
+    val allPosts: LiveData<List<Post>> = repository.allPosts.asLiveData()
 
-    val allPublicPosts: LiveData<List<Post>> = repository.getAllPosts().asLiveData()
+    fun getPublicPosts(): LiveData<List<Post>> =
+        repository.getPublicPosts().asLiveData()
 
     fun getPostsByUserId(userId: String): LiveData<List<Post>> =
         repository.getPostsByUserId(userId).asLiveData()
@@ -19,15 +18,18 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
     fun getPostsWithoutUserId(userId: String): LiveData<List<Post>> =
         repository.getPostsWithoutUserId(userId).asLiveData()
 
-    fun getPostById(postId: Int): LiveData<Post> = repository.getPostById(postId).asLiveData()
+    fun getPostById(postId: String): LiveData<Post?> = repository.getPostById(postId).asLiveData()
 
     fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): LiveData<List<Post>> =
         repository.getPostsBetweenPostTime(startTime, endTime).asLiveData()
 
-    fun insert(post: Post) {
+    fun insert(post: Post): LiveData<String> {
+        val postIdLiveData = MutableLiveData<String>()
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insert(post)
+            val postId = repository.insert(post)
+            postIdLiveData.postValue(postId)
         }
+        return postIdLiveData
     }
 
     fun update(post: Post) {
@@ -36,9 +38,9 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
         }
     }
 
-    fun delete(id: Int) {
+    fun delete(postId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.delete(id)
+            repository.delete(postId)
         }
     }
 

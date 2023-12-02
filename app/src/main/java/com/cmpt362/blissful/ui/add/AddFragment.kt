@@ -2,6 +2,7 @@ package com.cmpt362.blissful.ui.add
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -25,16 +26,13 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentAddBinding
-import com.cmpt362.blissful.db.LocalRoomDatabase
 import com.cmpt362.blissful.db.post.Post
-import com.cmpt362.blissful.db.post.PostDatabaseDao
-import com.cmpt362.blissful.db.post.PostRepository
-import com.cmpt362.blissful.db.post.PostViewModel
-import com.cmpt362.blissful.db.post.PostViewModelFactory
-import com.cmpt362.blissful.db.util.getBitmap
 import com.cmpt362.blissful.db.util.getUserId
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,28 +64,19 @@ class AddFragment : Fragment() {
     private lateinit var submitButton: Button
     private lateinit var postTextView: EditText
 
-    private lateinit var database: LocalRoomDatabase
-    private lateinit var databaseDao: PostDatabaseDao
-    private lateinit var repository: PostRepository
-    private lateinit var viewModelFactory: PostViewModelFactory
-    private lateinit var postViewModel: PostViewModel
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
 
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
 
-        addViewModel =
-            ViewModelProvider(this)[AddViewModel::class.java]
+        addViewModel = ViewModelProvider(this)[AddViewModel::class.java]
 
         _binding = FragmentAddBinding.inflate(inflater, container, false)
-        database = LocalRoomDatabase.getInstance(requireContext())
-        databaseDao = database.postDatabaseDao
-        repository = PostRepository(databaseDao)
-        viewModelFactory = PostViewModelFactory(repository)
-        postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
         publicToggleSwitch = binding.publicToggleSwitch
         publicToggleSwitch.setOnCheckedChangeListener { _, isChecked ->
             addViewModel.isPublic.value = isChecked
@@ -99,8 +88,7 @@ class AddFragment : Fragment() {
         // URI for the images
         tempImgUri = context?.let {
             FileProvider.getUriForFile(
-                it,
-                "com.cmpt362.blissful", tempImgFile
+                it, "com.cmpt362.blissful", tempImgFile
             )
         }!!
 
@@ -110,55 +98,52 @@ class AddFragment : Fragment() {
             showAlertDialog()
         }
 
-        cameraResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-        { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val bitmap = getBitmap(requireContext(), tempImgUri)
-                addViewModel.newImage.value = bitmap
-            }
-        }
-
-        galleryResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-        { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                tempImgUri = result.data?.data!!
-                val bitmap = getBitmap(requireContext(), tempImgUri)
-                addViewModel.newImage.value = bitmap
-
-                try {
-                    val file = File(
-                        context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        tempImgFileName
-                    )
-                    CoroutineScope(Dispatchers.IO).launch { openFile(file, bitmap) }
-
-                } catch (e: Exception) {
-                    Log.e(ContentValues.TAG, "File not saved: ", e)
+        cameraResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    addViewModel.newImage.value = tempImgUri.toString()
                 }
-
-
             }
-        }
+
+        galleryResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    tempImgUri = result.data?.data!!
+                    addViewModel.newImage.value = tempImgUri.toString()
+
+                    try {
+                        val file = File(
+                            context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                            tempImgFileName
+                        )
+                        CoroutineScope(Dispatchers.IO).launch { openFile(file, tempImgUri) }
+
+                    } catch (e: Exception) {
+                        Log.e(ContentValues.TAG, "File not saved: ", e)
+                    }
+                }
+            }
+
 
         // Saving the image in a View model
         addViewModel.newImage.observe(
             viewLifecycleOwner,
-        ) {
-            if (it != null) {
+        ) { uri ->
+            imageView = binding.imageView
+            if (uri != null) {
                 // User selected Image
-                imageView = binding.imageView
-                imageView.setImageBitmap(it)
+                Glide.with(this).load(uri)
+                    .into(imageView) // Use Glide or another library to load the image
             } else {
                 // Resetting back to placeholder image
-                imageView = binding.imageView
                 imageView.setImageDrawable(
                     AppCompatResources.getDrawable(
-                        requireContext(),
-                        R.drawable.photo_icon
+                        requireContext(), R.drawable.photo_icon
                     )
                 )
             }
         }
+
 
         postTextView = binding.postInput
         submitButton = binding.submitButton
@@ -178,26 +163,30 @@ class AddFragment : Fragment() {
     private fun showAlertDialog() {
         val pictureDialogItems = arrayOf("Select photo from Gallery", "Capture photo from Camera")
         activity?.let {
-            AlertDialog.Builder(it)
-                .setTitle("Enter your gratitude")
+            AlertDialog.Builder(it).setTitle("Enter your gratitude")
                 .setItems(pictureDialogItems) { _, which ->
                     when (which) {
                         0 -> gallery()
                         1 -> camera()
                     }
-                }
-                .show()
+                }.show()
         }
     }
 
-    private suspend fun openFile(file: File, bitmap: Bitmap) =
+    private suspend fun openFile(destinationFile: File, sourceUri: Uri) =
         withContext(Dispatchers.IO) {
-            val fileOut = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOut)
-            fileOut.flush()
-            fileOut.close()
+            try {
+                val inputStream = requireContext().contentResolver.openInputStream(sourceUri)
+                val outputStream = FileOutputStream(destinationFile)
+                inputStream?.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error copying file: ", e)
+            }
         }
-
 
     private fun camera() {
         // Generating the intent and clicking the image
@@ -218,9 +207,7 @@ class AddFragment : Fragment() {
         val userId = getUserId(requireContext())
         if (userId == null || userId == "") {
             Toast.makeText(
-                requireContext(),
-                "Please sign in to submit a post",
-                Toast.LENGTH_SHORT
+                requireContext(), "Please sign in to submit a post", Toast.LENGTH_SHORT
             ).show()
         } else {
             val postText = postTextView.text.toString().trim()
@@ -229,30 +216,30 @@ class AddFragment : Fragment() {
                 val isPublic = addViewModel.isPublic.value ?: false
 
                 val defaultPost = Post(
-                    userId = userId,
-                    content = postText,
-                    location = null,
-                    isPublic = isPublic
+                    userId = userId, content = postText, isPublic = isPublic
                 )
 
                 val post = if (addViewModel.newImage.value != null) {
                     try {
-                        val image = addViewModel.newImage.value
+                        // Assuming addViewModel.newImage.value contains the image URL
+                        val imageUrl = addViewModel.newImage.value
                         Post(
                             userId = userId,
                             content = postText,
-                            location = null,
-                            image = image,
-                            isPublic = isPublic
+                            isPublic = isPublic,
+                            imageUrl = imageUrl,
                         )
                     } catch (e: Exception) {
-                        Log.e(ContentValues.TAG, "File not saved: ", e)
+                        Log.e(ContentValues.TAG, "Error creating post with image URL: ", e)
                         defaultPost
                     }
                 } else {
                     defaultPost
                 }
-                postViewModel.insert(post)
+
+                // Save post to Firebase Firestore
+                savePostToFirestore(post)
+
                 postTextView.text.clear()
                 Toast.makeText(requireContext(), "Post submitted", Toast.LENGTH_SHORT).show()
             } else {
@@ -260,5 +247,18 @@ class AddFragment : Fragment() {
                     .show()
             }
         }
+    }
+
+
+    private fun savePostToFirestore(post: Post) {
+        // Set the collection reference to the "posts" collection
+        val postsCollection = db.collection("posts")
+
+        // Add the post to Firestore
+        postsCollection.add(post.toMap()).addOnSuccessListener { documentReference ->
+                Log.d(TAG, "Post added with ID: ${documentReference.id}")
+            }.addOnFailureListener { e ->
+                Log.e(TAG, "Error adding post", e)
+            }
     }
 }

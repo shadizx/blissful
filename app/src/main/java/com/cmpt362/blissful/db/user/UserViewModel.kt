@@ -35,8 +35,8 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         return isUsernameTakenLiveData
     }
 
-    fun getIdForUser(username: String): LiveData<String> {
-        val idLiveData = MutableLiveData<String>()
+    fun getIdForUser(username: String): MutableLiveData<String?> {
+        val idLiveData = MutableLiveData<String?>()
         viewModelScope.launch(Dispatchers.IO) {
             val id = repository.getIdForUser(username)
             idLiveData.postValue(id)
