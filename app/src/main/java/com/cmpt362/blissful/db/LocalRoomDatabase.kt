@@ -1,18 +1,13 @@
 package com.cmpt362.blissful.db
 
 import android.content.Context
-import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.cmpt362.blissful.db.post.Post
-import com.cmpt362.blissful.db.post.PostDatabaseDao
 import com.cmpt362.blissful.db.util.Converters
 
-@Database(entities = [Post::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class LocalRoomDatabase : RoomDatabase() {
-    abstract val postDatabaseDao: PostDatabaseDao
 
     companion object {
         @Volatile

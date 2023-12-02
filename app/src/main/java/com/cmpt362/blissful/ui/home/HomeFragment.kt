@@ -17,8 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentHomeBinding
-import com.cmpt362.blissful.db.LocalRoomDatabase
-import com.cmpt362.blissful.db.post.PostDatabaseDao
 import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
@@ -28,6 +26,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 
@@ -41,9 +40,6 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     // DB instances
-    private lateinit var database: LocalRoomDatabase
-    private lateinit var databaseDao: PostDatabaseDao
-    private lateinit var repository: PostRepository
     private lateinit var viewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
@@ -67,15 +63,12 @@ class HomeFragment : Fragment() {
     private val storageRef = Firebase.storage.reference
 
     data class User(
-        val entryName: String = "",
-        val data: String = ""
+        val entryName: String = "", val data: String = ""
     )
 
     private fun initializeDatabase() {
-        database = LocalRoomDatabase.getInstance(requireContext())
-        databaseDao = database.postDatabaseDao
-        repository = PostRepository(databaseDao)
-        viewModelFactory = PostViewModelFactory(repository)
+        val postRepository = PostRepository(FirebaseFirestore.getInstance())
+        viewModelFactory = PostViewModelFactory(postRepository)
         postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
     }
 
@@ -97,7 +90,7 @@ class HomeFragment : Fragment() {
                 publicPostsRecyclerView.adapter = adapter
             }
         } else {
-            postViewModel.allPublicPosts.observe(viewLifecycleOwner) {
+            postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
                 publicPostsRecyclerView.adapter = adapter
             }
         }
@@ -108,7 +101,6 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
         auth = Firebase.auth
 
         // Query the users collection
@@ -131,9 +123,7 @@ class HomeFragment : Fragment() {
                 if (model.data != "") {
                     // using glide library to display the image
                     storageRef.child("file/${model.data}").downloadUrl.addOnSuccessListener {
-                        Glide.with(requireActivity())
-                            .load(it)
-                            .into(imageView)
+                        Glide.with(requireActivity()).load(it).into(imageView)
                         Log.e("Firebase", "download passed")
                     }.addOnFailureListener {
                         Log.e("Firebase", "Failed in downloading")
