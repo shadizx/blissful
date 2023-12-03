@@ -1,10 +1,8 @@
 package com.cmpt362.blissful.ui.add
 
 import android.app.Activity
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -16,13 +14,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -31,14 +29,17 @@ import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentAddBinding
 import com.cmpt362.blissful.db.post.Post
 import com.cmpt362.blissful.db.util.getUserId
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 
 
 class AddFragment : Fragment() {
@@ -52,7 +53,7 @@ class AddFragment : Fragment() {
     private lateinit var intent: Intent
     private lateinit var tempImgFile: File
     private lateinit var imageView: ImageView
-    private lateinit var publicToggleSwitch: Switch
+    private lateinit var publicToggleSwitch: SwitchCompat
 
     private val tempImgFileName = "temp_image.jpg"
 
@@ -66,6 +67,7 @@ class AddFragment : Fragment() {
 
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
+    private val storageRef = Firebase.storage.reference
 
 
     override fun onCreateView(
@@ -119,7 +121,7 @@ class AddFragment : Fragment() {
                         CoroutineScope(Dispatchers.IO).launch { openFile(file, tempImgUri) }
 
                     } catch (e: Exception) {
-                        Log.e(ContentValues.TAG, "File not saved: ", e)
+                        Log.e(TAG, "File not saved: ", e)
                     }
                 }
             }
@@ -184,7 +186,7 @@ class AddFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error copying file: ", e)
+                Log.e(TAG, "Error copying file: ", e)
             }
         }
 
@@ -205,7 +207,7 @@ class AddFragment : Fragment() {
 
     private fun submitPost() {
         val userId = getUserId(requireContext())
-        if (userId == null || userId == "") {
+        if (userId == "") {
             Toast.makeText(
                 requireContext(), "Please sign in to submit a post", Toast.LENGTH_SHORT
             ).show()
@@ -222,7 +224,21 @@ class AddFragment : Fragment() {
                 val post = if (addViewModel.newImage.value != null) {
                     try {
                         // Assuming addViewModel.newImage.value contains the image URL
-                        val imageUrl = addViewModel.newImage.value
+                        //val imageUrl = addViewModel.newImage.value
+
+                        // Save Image in firebase storage
+                        // Image name format: Random_generated_string.jpg
+                        val imageUrl =
+                            "${UUID.randomUUID()}.jpg"
+
+                        val uploadTask = storageRef.child("file/$imageUrl").putFile(tempImgUri)
+                        // On success
+                        uploadTask.addOnSuccessListener {
+                            Log.e("Firebase", "Image Upload passed")
+                        } // On success
+                            .addOnFailureListener {
+                                Log.e("Firebase", "Image Upload fail")
+                            }
                         Post(
                             userId = userId,
                             content = postText,
@@ -230,7 +246,7 @@ class AddFragment : Fragment() {
                             imageUrl = imageUrl,
                         )
                     } catch (e: Exception) {
-                        Log.e(ContentValues.TAG, "Error creating post with image URL: ", e)
+                        Log.e(TAG, "Error creating post with image URL: ", e)
                         defaultPost
                     }
                 } else {
@@ -256,9 +272,9 @@ class AddFragment : Fragment() {
 
         // Add the post to Firestore
         postsCollection.add(post.toMap()).addOnSuccessListener { documentReference ->
-                Log.d(TAG, "Post added with ID: ${documentReference.id}")
-            }.addOnFailureListener { e ->
-                Log.e(TAG, "Error adding post", e)
-            }
+            Log.d(TAG, "Post added with ID: ${documentReference.id}")
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "Error adding post", e)
+        }
     }
 }
