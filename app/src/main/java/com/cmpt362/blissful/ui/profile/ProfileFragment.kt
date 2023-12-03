@@ -13,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import android.widget.ViewFlipper
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,7 +34,7 @@ import com.cmpt362.blissful.db.user.UserViewModel
 import com.cmpt362.blissful.db.user.UserViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
 import com.cmpt362.blissful.db.util.signOut
-import com.cmpt362.blissful.ui.home.GratitudeAdapter
+import com.cmpt362.blissful.ui.home.PostAdapter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -54,7 +55,7 @@ class ProfileFragment : Fragment() {
     private lateinit var userRepository: UserRepository
 
     private lateinit var userPostsArrayList: ArrayList<Post>
-    private lateinit var userPostsAdapter: GratitudeAdapter
+    private lateinit var userPostsAdapter: PostAdapter
     private lateinit var userPostsRecyclerView: RecyclerView
 
     private lateinit var viewModelFactory: PostViewModelFactory
@@ -169,7 +170,7 @@ class ProfileFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            userViewModel.getUsernameForUserId(userId.toString())
+            userViewModel.getUsernameForUserId(userId)
                 .observe(viewLifecycleOwner) { username ->
                     val data = "Hello, $username!"
                     profileText.text = data
@@ -203,7 +204,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateAchievementComponent(numPosts: Int) {
-        val firstPostProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.first_post_progressbar)
+        val firstPostProgressBar =
+            viewFlipper.findViewById<ProgressBar>(R.id.first_post_progressbar)
         val tenPostsProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.ten_posts_progressbar)
         val firstPostText = viewFlipper.findViewById<TextView>(R.id.first_post_text)
         val tenPostsText = viewFlipper.findViewById<TextView>(R.id.ten_posts_text)
@@ -230,13 +232,14 @@ class ProfileFragment : Fragment() {
         userPostsRecyclerView = viewFlipper.findViewById(R.id.user_posts)
         userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         userPostsArrayList = ArrayList()
-        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
+        userPostsAdapter = PostAdapter(userPostsArrayList, setOf(), ::onHeartToggled)
         userPostsRecyclerView.adapter = userPostsAdapter
         userPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
     private fun updateDisplayedPosts() {
         lifecycleScope.launch {
+
             postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) {
                 userPostsAdapter.setData(it)
                 userPostsAdapter.notifyDataSetChanged()
@@ -269,14 +272,14 @@ class ProfileFragment : Fragment() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    signUpUser(user)
-                } else {
-                    Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT)
-                        .show()
-                }
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                signUpUser(user)
+            } else {
+                Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT)
+                    .show()
             }
+        }
     }
 
     override fun onStart() {
@@ -295,6 +298,7 @@ class ProfileFragment : Fragment() {
                         val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
                         val editor = sharedPreferences.edit()
                         editor.putString("userId", userId)
+                        editor.putString("userName", username)
                         editor.apply()
                     }
                 }
@@ -310,8 +314,17 @@ class ProfileFragment : Fragment() {
             val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
             val editor = sharedPreferences.edit()
             editor.putString("userId", id)
+            editor.putString("userName", username)
             editor.apply()
         }
+    }
+
+    private fun onHeartToggled(
+        postId: String,
+        heartToggle: ToggleButton,
+        itemNumberOfLikes: TextView
+    ) {
+        heartToggle.isChecked = false
     }
 
     override fun onDestroyView() {
@@ -321,8 +334,10 @@ class ProfileFragment : Fragment() {
 
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-            getCredentials()
-            setUpPage()
+            if (isAdded && context != null) {
+                getCredentials()
+                setUpPage()
+            }
         }
 
     private companion object LoginActivity {

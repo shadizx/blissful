@@ -1,5 +1,6 @@
 package com.cmpt362.blissful.db.post
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,9 @@ class PostRepository(private val db: FirebaseFirestore) {
     }
 
     fun getPostsWithoutUserId(userId: String): Flow<List<Post>> = flow {
-        val snapshot = db.collection("posts").whereNotEqualTo("userId", userId).whereEqualTo("isPublic", true).get().await()
+        val snapshot =
+            db.collection("posts").whereNotEqualTo("userId", userId).whereEqualTo("isPublic", true)
+                .get().await()
         emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
     }
 
@@ -48,16 +51,17 @@ class PostRepository(private val db: FirebaseFirestore) {
         return docRef.id // Firebase generates a unique ID for the post
     }
 
-    suspend fun update(post: Post) {
-        db.collection("posts").document(post.postId).set(post.toMap()).await()
+    suspend fun likePost(postId: String) {
+        db.collection("posts").document(postId).update("likesCount", FieldValue.increment(1))
+            .await()
+    }
+
+    suspend fun unlikePost(postId: String) {
+        db.collection("posts").document(postId).update("likesCount", FieldValue.increment(-1))
+            .await()
     }
 
     suspend fun delete(postId: String) {
         db.collection("posts").document(postId).delete().await()
-    }
-
-    suspend fun deleteAll() {
-        val snapshot = db.collection("posts").get().await()
-        snapshot.documents.forEach { doc -> db.collection("posts").document(doc.id).delete() }
     }
 }

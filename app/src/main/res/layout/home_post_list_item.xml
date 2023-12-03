@@ -2,13 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginVertical="10dp"
-        android:background="@android:color/darker_gray" />
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/border"
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -19,17 +16,23 @@
             android:id="@+id/itemDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="30dp"/>
+            android:layout_marginEnd="30dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/heart_icon"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
+        <ToggleButton
+            android:id="@+id/heartToggle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentEnd="true"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="12dp"
-            android:src="@drawable/heart_icon" />
+            android:background="@drawable/heart_toggle"
+            android:src="@drawable/heart"
+            android:textOff=""
+            android:textOn="" />
 
         <TextView
             android:id="@+id/itemNumberOfLikes"
@@ -38,7 +41,6 @@
             android:layout_alignParentEnd="true"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
-
     </RelativeLayout>
 
     <ImageView
@@ -56,12 +58,6 @@
 
     <TextView
         android:id="@+id/itemPostDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp" />
-
-    <TextView
-        android:id="@+id/itemLastUpdateDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp" />

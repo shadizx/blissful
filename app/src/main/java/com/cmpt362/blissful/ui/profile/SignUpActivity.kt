@@ -1,5 +1,6 @@
 package com.cmpt362.blissful.ui.profile
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -54,7 +55,8 @@ class SignUpActivity : AppCompatActivity() {
         if (username.isNotEmpty() && password.isNotEmpty()) {
             checkIfUsernameTaken(username, password)
         } else {
-            Toast.makeText(this, "Please enter both username and password", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter both username and password", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -73,7 +75,14 @@ class SignUpActivity : AppCompatActivity() {
         userViewModel.insert(user).observe(this) { userId ->
             if (userId != null) {
                 // Handle successful registration
+                val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.putString("userId", userId)
+                editor.putString("userName", username)
+                editor.apply()
+
                 Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
