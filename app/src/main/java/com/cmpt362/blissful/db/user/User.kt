@@ -1,14 +1,11 @@
 package com.cmpt362.blissful.db.user
 
-import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.DocumentId
 
 data class User(
-    @get:Exclude var userId: String = "",
-
+    @DocumentId var id: String = "",
     var username: String = "",
-
     var password: String = "",
-
     var profileImgUrl: String = "",
 ) {
     constructor() : this("", "", "")

@@ -48,10 +48,6 @@ class PostRepository(private val db: FirebaseFirestore) {
         return docRef.id // Firebase generates a unique ID for the post
     }
 
-    suspend fun update(post: Post) {
-        db.collection("posts").document(post.postId).set(post.toMap()).await()
-    }
-
     suspend fun delete(postId: String) {
         db.collection("posts").document(postId).delete().await()
     }

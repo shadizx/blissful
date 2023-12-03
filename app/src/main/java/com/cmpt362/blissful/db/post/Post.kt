@@ -1,10 +1,10 @@
 package com.cmpt362.blissful.db.post
 
-import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.DocumentId
 import java.util.*
 
 data class Post(
-    @get:Exclude var postId: String = "",
+    @DocumentId var id: String = "",
     var userId: String = "",
     var content: String = "",
     var postDateTime: Long = Calendar.getInstance().timeInMillis,
