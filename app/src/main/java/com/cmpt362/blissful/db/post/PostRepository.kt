@@ -25,7 +25,9 @@ class PostRepository(private val db: FirebaseFirestore) {
     }
 
     fun getPostsWithoutUserId(userId: String): Flow<List<Post>> = flow {
-        val snapshot = db.collection("posts").whereNotEqualTo("userId", userId).whereEqualTo("isPublic", true).get().await()
+        val snapshot =
+            db.collection("posts").whereNotEqualTo("userId", userId).whereEqualTo("isPublic", true)
+                .get().await()
         emit(snapshot.documents.mapNotNull { it.toObject<Post>() })
     }
 
