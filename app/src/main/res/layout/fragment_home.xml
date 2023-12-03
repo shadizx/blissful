@@ -31,7 +31,8 @@
             android:layout_marginHorizontal="15dp"
             android:layout_marginBottom="5dp"
             android:text="Public Posts"
-            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -40,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="15dp"
             android:layout_marginBottom="10dp"
-            android:paddingBottom="?actionBarSize"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:paddingBottom="?actionBarSize" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
