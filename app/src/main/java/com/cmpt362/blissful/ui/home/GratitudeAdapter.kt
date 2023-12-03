@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.db.post.Post
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -25,18 +27,26 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = gratitudeItems[position]
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
+        val storageRef = Firebase.storage.reference
 
         holder.itemDescription.text = item.content
         holder.authorUsername.text = item.userId // TODO: update to display username
         holder.itemPostDate.text = dateFormat.format(item.postDateTime)
         holder.itemNumberOfLikes.text = item.likesCount.toString()
 
-        // Load the image using Picasso
+        // Load the image using Glide
         if (item.imageUrl != null && item.imageUrl!!.isNotEmpty()) {
             Log.d("ImageUrl", item.imageUrl!!)
-            Glide.with(holder.itemView).load(item.imageUrl).into(holder.itemImage)
+            storageRef.child("file/${item.imageUrl}").downloadUrl.addOnSuccessListener {
+                Glide.with(holder.itemView).load(it).into(holder.itemImage)
+                Log.e("Firebase", "download passed")
+            }.addOnFailureListener {
+                Log.e("Firebase", "Failed in downloading")
+            }
+
             holder.itemImage.visibility = View.VISIBLE
         } else {
+            // Disable imageview if no image was passed by the user
             holder.itemImage.visibility = View.GONE
         }
 
