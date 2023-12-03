@@ -53,7 +53,7 @@ class GratitudeAdapter(
         }
 
         holder.heartToggle.setOnClickListener {
-            onHeartToggled?.invoke(item.postId, holder.heartToggle)
+            onHeartToggled?.invoke(item.id, holder.heartToggle)
         }
     }
 
