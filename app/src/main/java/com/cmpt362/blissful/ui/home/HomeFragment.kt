@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +16,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentHomeBinding
+import com.cmpt362.blissful.db.like.Like
+import com.cmpt362.blissful.db.like.LikeRepository
+import com.cmpt362.blissful.db.like.LikeViewModel
+import com.cmpt362.blissful.db.like.LikeViewModelFactory
 import com.cmpt362.blissful.db.post.Post
 import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
@@ -23,7 +27,6 @@ import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-
 
 class HomeFragment : Fragment() {
 
@@ -34,11 +37,14 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     // DB instances
-    private lateinit var viewModelFactory: PostViewModelFactory
+    private lateinit var postViewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
+    private lateinit var likesViewModelFactory: LikeViewModelFactory
+    private lateinit var likeViewModel: LikeViewModel
+
     private lateinit var publicPostsArrayList: ArrayList<Post>
-    private lateinit var publicPostsAdapter: GratitudeAdapter
+    private lateinit var publicPostsAdapter: PostAdapter
     private lateinit var publicPostsRecyclerView: RecyclerView
 
     // Logged in state
@@ -49,46 +55,6 @@ class HomeFragment : Fragment() {
             getCredentials()
             updateDisplayedPosts()
         }
-
-    private fun initializeDatabase() {
-        val postRepository = PostRepository(FirebaseFirestore.getInstance())
-        viewModelFactory = PostViewModelFactory(postRepository)
-        postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
-    }
-
-    private fun initializeAdapter(root: View) {
-        publicPostsRecyclerView = root.findViewById(R.id.public_posts)
-        publicPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        publicPostsArrayList = ArrayList()
-        publicPostsAdapter = GratitudeAdapter(publicPostsArrayList, ::onHeartToggled)
-        publicPostsRecyclerView.adapter = publicPostsAdapter
-        publicPostsRecyclerView.isNestedScrollingEnabled = false
-    }
-
-    private fun getCredentials() {
-        userId = getUserId(requireContext())
-        isSignedIn = userId != ""
-    }
-
-    private fun updateDisplayedPosts() {
-        if (isSignedIn) {
-            lifecycleScope.launch {
-                postViewModel.getPostsWithoutUserId(userId).observe(viewLifecycleOwner) {
-                    publicPostsAdapter.setData(it)
-                    publicPostsAdapter.notifyDataSetChanged()
-                    publicPostsRecyclerView.adapter = publicPostsAdapter
-                }
-            }
-        } else {
-            lifecycleScope.launch {
-                postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
-                    publicPostsAdapter.setData(it)
-                    publicPostsAdapter.notifyDataSetChanged()
-                    publicPostsRecyclerView.adapter = publicPostsAdapter
-                }
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -112,6 +78,57 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    private fun initializeDatabase() {
+        val firebase = FirebaseFirestore.getInstance()
+        val postRepository = PostRepository(firebase)
+        postViewModelFactory = PostViewModelFactory(postRepository)
+        postViewModel = ViewModelProvider(this, postViewModelFactory)[PostViewModel::class.java]
+
+        val likeRepository = LikeRepository(firebase)
+        likesViewModelFactory = LikeViewModelFactory(likeRepository)
+        likeViewModel = ViewModelProvider(this, likesViewModelFactory)[LikeViewModel::class.java]
+    }
+
+    private fun initializeAdapter(root: View) {
+        publicPostsRecyclerView = root.findViewById(R.id.public_posts)
+        publicPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        publicPostsArrayList = ArrayList()
+        publicPostsAdapter = PostAdapter(publicPostsArrayList, setOf(), ::onHeartToggled)
+        publicPostsRecyclerView.adapter = publicPostsAdapter
+        publicPostsRecyclerView.isNestedScrollingEnabled = false
+    }
+
+    private fun getCredentials() {
+        userId = getUserId(requireContext())
+        isSignedIn = userId != ""
+    }
+
+    private fun updateDisplayedPosts() {
+        if (isSignedIn) {
+            lifecycleScope.launch {
+                postViewModel.getPostsWithoutUserId(userId).observe(viewLifecycleOwner) {
+                    publicPostsAdapter.setData(it)
+                    publicPostsAdapter.notifyDataSetChanged()
+                    publicPostsRecyclerView.adapter = publicPostsAdapter
+                }
+            }
+            lifecycleScope.launch {
+                likeViewModel.getLikesByUserId(userId).observe(viewLifecycleOwner) {
+                    publicPostsAdapter.setUserLikedPosts(it)
+                    publicPostsAdapter.notifyDataSetChanged()
+                }
+            }
+        } else {
+            lifecycleScope.launch {
+                postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
+                    publicPostsAdapter.setData(it)
+                    publicPostsAdapter.notifyDataSetChanged()
+                    publicPostsRecyclerView.adapter = publicPostsAdapter
+                }
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         requireActivity().getSharedPreferences("user", 0)
@@ -125,22 +142,16 @@ class HomeFragment : Fragment() {
         findNavController().navigate(R.id.navigation_add)
     }
 
-    private fun onHeartToggled(postId: String, heartToggle: ToggleButton) {
+    private fun onHeartToggled(postId: String, heartToggle: ToggleButton, likesCount: TextView) {
         if (isSignedIn) {
             if (heartToggle.isChecked) {
-                postViewModel.likePost(postId, userId)
-                Toast.makeText(
-                    requireContext(),
-                    "Liked post $postId by user $userId",
-                    Toast.LENGTH_SHORT
-                ).show()
+                likesCount.text = (likesCount.text.toString().toInt() + 1).toString()
+                likeViewModel.insert(Like(userId = userId, postId = postId))
+                postViewModel.likePost(postId)
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Unliked post $postId by user $userId",
-                    Toast.LENGTH_SHORT
-                ).show()
-                postViewModel.unlikePost(postId, userId)
+                likesCount.text = (likesCount.text.toString().toInt() - 1).toString()
+                likeViewModel.delete(userId, postId)
+                postViewModel.unlikePost(postId)
             }
         } else {
             heartToggle.isChecked = false

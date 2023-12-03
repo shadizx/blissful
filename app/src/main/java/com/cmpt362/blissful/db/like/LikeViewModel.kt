@@ -29,11 +29,21 @@ class LikeViewModel(private val repository: LikeRepository) : ViewModel() {
         }
     }
 
-    fun hasUserLikedPost(userId: String, postId: String): Boolean {
-        var hasUserLikedPost = false
+    fun getLikesByUserId(userId: String): LiveData<Set<String>> {
+        val likesLiveData = MutableLiveData<Set<String>>()
         viewModelScope.launch(Dispatchers.IO) {
-            hasUserLikedPost = repository.hasUserLikedPost(userId, postId)
+            val likes = repository.getPostsThatUserLiked(userId)
+            likesLiveData.postValue(likes)
         }
-        return hasUserLikedPost
+        return likesLiveData
+    }
+}
+
+class LikeViewModelFactory(private val repository: LikeRepository) :
+    androidx.lifecycle.ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(LikeViewModel::class.java))
+            return LikeViewModel(repository) as T
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
