@@ -223,9 +223,6 @@ class AddFragment : Fragment() {
 
                 val post = if (addViewModel.newImage.value != null) {
                     try {
-                        // Assuming addViewModel.newImage.value contains the image URL
-                        //val imageUrl = addViewModel.newImage.value
-
                         // Save Image in firebase storage
                         // Image name format: Random_generated_string.jpg
                         val imageUrl =
