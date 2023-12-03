@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
@@ -15,7 +16,10 @@ import com.google.firebase.storage.storage
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class GratitudeAdapter(private var gratitudeItems: List<Post>) :
+class GratitudeAdapter(
+    private var gratitudeItems: List<Post>,
+    private val onHeartToggled: ((String, ToggleButton) -> Unit)? = null
+) :
     RecyclerView.Adapter<GratitudeAdapter.ViewHolder>() {
     override fun onCreateViewHolder(viewgroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewgroup.context)
@@ -48,6 +52,9 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
             holder.itemImage.visibility = View.GONE
         }
 
+        holder.heartToggle.setOnClickListener {
+            onHeartToggled?.invoke(item.postId, holder.heartToggle)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -65,5 +72,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)
         val itemNumberOfLikes: TextView = itemView.findViewById(R.id.itemNumberOfLikes)
+        val heartToggle: ToggleButton = itemView.findViewById(R.id.heartToggle)
     }
 }

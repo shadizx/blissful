@@ -1,6 +1,11 @@
 package com.cmpt362.blissful.db.post
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -32,22 +37,12 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
         return postIdLiveData
     }
 
-    fun update(post: Post) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.update(post)
-        }
+    fun likePost(postId: String, userId: String) {
+        println("Liked post $postId by user $userId")
     }
 
-    fun delete(postId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.delete(postId)
-        }
-    }
-
-    fun deleteAll() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteAll()
-        }
+    fun unlikePost(postId: String, userId: String) {
+        println("Unliked post $postId by user $userId")
     }
 }
 
