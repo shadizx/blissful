@@ -37,12 +37,16 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
         return postIdLiveData
     }
 
-    fun likePost(postId: String, userId: String) {
-        println("Liked post $postId by user $userId")
+    fun likePost(postId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.likePost(postId)
+        }
     }
 
-    fun unlikePost(postId: String, userId: String) {
-        println("Unliked post $postId by user $userId")
+    fun unlikePost(postId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.unlikePost(postId)
+        }
     }
 }
 

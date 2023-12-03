@@ -1,6 +1,5 @@
 package com.cmpt362.blissful.ui.home
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,20 +15,21 @@ import com.google.firebase.storage.storage
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class GratitudeAdapter(
-    private var gratitudeItems: List<Post>,
-    private val onHeartToggled: ((String, ToggleButton) -> Unit)? = null
+class PostAdapter(
+    private var posts: List<Post>,
+    private var userLikedPosts: Set<String>,
+    private val onHeartToggled: ((String, ToggleButton, TextView) -> Unit)? = null
 ) :
-    RecyclerView.Adapter<GratitudeAdapter.ViewHolder>() {
+    RecyclerView.Adapter<PostAdapter.ViewHolder>() {
     override fun onCreateViewHolder(viewgroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewgroup.context)
-            .inflate(R.layout.home_gratitude_list_item, viewgroup, false)
+            .inflate(R.layout.home_post_list_item, viewgroup, false)
 
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = gratitudeItems[position]
+        val item = posts[position]
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' hh:mm a", Locale.getDefault())
         val storageRef = Firebase.storage.reference
 
@@ -39,11 +39,8 @@ class GratitudeAdapter(
 
         // Load the image using Glide
         if (item.imageUrl != null && item.imageUrl!!.isNotEmpty()) {
-            Log.d("ImageUrl", item.imageUrl!!)
             storageRef.child("file/${item.imageUrl}").downloadUrl.addOnSuccessListener {
                 Glide.with(holder.itemView).load(it).into(holder.itemImage)
-            }.addOnFailureListener {
-                Log.e("Firebase", "Failed in downloading")
             }
 
             holder.itemImage.visibility = View.VISIBLE
@@ -52,19 +49,22 @@ class GratitudeAdapter(
             holder.itemImage.visibility = View.GONE
         }
 
+        holder.heartToggle.isChecked = userLikedPosts.contains(item.id)
         holder.heartToggle.setOnClickListener {
-            onHeartToggled?.invoke(item.id, holder.heartToggle)
+            onHeartToggled?.invoke(item.id, holder.heartToggle, holder.itemNumberOfLikes)
         }
     }
 
-    override fun getItemCount(): Int {
-        return gratitudeItems.size
-    }
+    override fun getItemCount() = posts.size
 
     fun setData(it: List<Post>?) {
         if (it != null) {
-            gratitudeItems = it
+            posts = it
         }
+    }
+
+    fun setUserLikedPosts(userLikedPosts: Set<String>) {
+        this.userLikedPosts = userLikedPosts
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

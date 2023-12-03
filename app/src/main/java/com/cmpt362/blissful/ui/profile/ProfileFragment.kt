@@ -13,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import android.widget.ViewFlipper
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,7 +34,7 @@ import com.cmpt362.blissful.db.user.UserViewModel
 import com.cmpt362.blissful.db.user.UserViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
 import com.cmpt362.blissful.db.util.signOut
-import com.cmpt362.blissful.ui.home.GratitudeAdapter
+import com.cmpt362.blissful.ui.home.PostAdapter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -54,7 +55,7 @@ class ProfileFragment : Fragment() {
     private lateinit var userRepository: UserRepository
 
     private lateinit var userPostsArrayList: ArrayList<Post>
-    private lateinit var userPostsAdapter: GratitudeAdapter
+    private lateinit var userPostsAdapter: PostAdapter
     private lateinit var userPostsRecyclerView: RecyclerView
 
     private lateinit var viewModelFactory: PostViewModelFactory
@@ -169,7 +170,7 @@ class ProfileFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            userViewModel.getUsernameForUserId(userId.toString())
+            userViewModel.getUsernameForUserId(userId)
                 .observe(viewLifecycleOwner) { username ->
                     val data = "Hello, $username!"
                     profileText.text = data
@@ -231,7 +232,7 @@ class ProfileFragment : Fragment() {
         userPostsRecyclerView = viewFlipper.findViewById(R.id.user_posts)
         userPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         userPostsArrayList = ArrayList()
-        userPostsAdapter = GratitudeAdapter(userPostsArrayList)
+        userPostsAdapter = PostAdapter(userPostsArrayList, setOf(), ::onHeartToggled)
         userPostsRecyclerView.adapter = userPostsAdapter
         userPostsRecyclerView.isNestedScrollingEnabled = false
     }
@@ -313,6 +314,14 @@ class ProfileFragment : Fragment() {
             editor.putString("userId", id)
             editor.apply()
         }
+    }
+
+    private fun onHeartToggled(
+        postId: String,
+        heartToggle: ToggleButton,
+        itemNumberOfLikes: TextView
+    ) {
+        heartToggle.isChecked = false
     }
 
     override fun onDestroyView() {

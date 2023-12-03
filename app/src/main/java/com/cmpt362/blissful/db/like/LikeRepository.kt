@@ -1,6 +1,7 @@
 package com.cmpt362.blissful.db.like
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 
 class LikeRepository(private val db: FirebaseFirestore) {
@@ -20,10 +21,8 @@ class LikeRepository(private val db: FirebaseFirestore) {
         snapshot.documents.forEach { it.reference.delete() }
     }
 
-    suspend fun hasUserLikedPost(userId: String, postId: String): Boolean {
-        val snapshot =
-            db.collection("likes").whereEqualTo("userId", userId).whereEqualTo("postId", postId)
-                .get().await()
-        return snapshot.documents.isNotEmpty()
+    suspend fun getPostsThatUserLiked(userId: String): Set<String> {
+        val snapshot = db.collection("likes").whereEqualTo("userId", userId).get().await()
+        return snapshot.documents.mapNotNull { it.toObject<Like>()?.postId }.toSet()
     }
 }
