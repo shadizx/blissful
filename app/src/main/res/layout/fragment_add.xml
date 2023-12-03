@@ -14,24 +14,28 @@
         android:textSize="30sp"
         android:textStyle="bold" />
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="300dp"
-        android:layout_height="280dp"
-        android:layout_gravity="center"
-        android:contentDescription="photo icon"
-        android:minWidth="150dp"
-        android:minHeight="150dp"
-        app:srcCompat="@drawable/photo_icon" />
-
-    <Button
-        android:id="@+id/photoSubmitButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="20dp"
-        android:backgroundTint="@android:color/system_neutral1_200"
-        android:text="Add a Photo" />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:contentDescription="photo icon"
+            app:srcCompat="@drawable/photo_icon" />
+
+        <Button
+            android:id="@+id/photoSubmitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:backgroundTint="@android:color/system_neutral1_200"
+            android:text="Add a Photo" />
+    </LinearLayout>
+
 
     <EditText
         android:id="@+id/post_input"
@@ -53,24 +57,27 @@
         android:text="1000 characters"
         android:textSize="12sp" />
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/publicToggleSwitch"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="12dp"
-        android:checked="true"
-        android:minHeight="48dp"
-        android:text="Public Post" />
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
 
-    <Button
-        android:id="@+id/submit_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="70dp"
-        android:minHeight="48dp"
-        android:text="Submit Post" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/publicToggleSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:checked="true"
+            android:text="Public Post" />
+
+        <Button
+            android:id="@+id/submit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Submit Post" />
+    </LinearLayout>
 
 </LinearLayout>
