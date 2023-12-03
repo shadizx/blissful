@@ -2,33 +2,25 @@ package com.cmpt362.blissful.ui.home
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentHomeBinding
+import com.cmpt362.blissful.db.post.Post
 import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
+import kotlinx.coroutines.launch
 
 
 class HomeFragment : Fragment() {
@@ -43,6 +35,8 @@ class HomeFragment : Fragment() {
     private lateinit var viewModelFactory: PostViewModelFactory
     private lateinit var postViewModel: PostViewModel
 
+    private lateinit var publicPostsArrayList: ArrayList<Post>
+    private lateinit var publicPostsAdapter: GratitudeAdapter
     private lateinit var publicPostsRecyclerView: RecyclerView
 
     // Logged in state
@@ -54,18 +48,6 @@ class HomeFragment : Fragment() {
             updateDisplayedPosts()
         }
 
-    // Firebase
-    class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-
-    private val db = Firebase.firestore
-    private lateinit var auth: FirebaseAuth
-    private lateinit var adapter: FirestoreRecyclerAdapter<User, UserViewHolder>
-    private val storageRef = Firebase.storage.reference
-
-    data class User(
-        val entryName: String = "", val data: String = ""
-    )
-
     private fun initializeDatabase() {
         val postRepository = PostRepository(FirebaseFirestore.getInstance())
         viewModelFactory = PostViewModelFactory(postRepository)
@@ -75,7 +57,9 @@ class HomeFragment : Fragment() {
     private fun initializeAdapter(root: View) {
         publicPostsRecyclerView = root.findViewById(R.id.public_posts)
         publicPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        publicPostsRecyclerView.adapter = adapter
+        publicPostsArrayList = ArrayList()
+        publicPostsAdapter = GratitudeAdapter(publicPostsArrayList)
+        publicPostsRecyclerView.adapter = publicPostsAdapter
         publicPostsRecyclerView.isNestedScrollingEnabled = false
     }
 
@@ -85,13 +69,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateDisplayedPosts() {
-        if (isSignedIn) {
-            postViewModel.getPostsWithoutUserId(userId).observe(viewLifecycleOwner) {
-                publicPostsRecyclerView.adapter = adapter
-            }
-        } else {
+        lifecycleScope.launch {
             postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
-                publicPostsRecyclerView.adapter = adapter
+                publicPostsAdapter.setData(it)
+                publicPostsAdapter.notifyDataSetChanged()
+                publicPostsRecyclerView.adapter = publicPostsAdapter
             }
         }
     }
@@ -101,44 +83,6 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        auth = Firebase.auth
-
-        // Query the users collection
-        val query = db.collection("entries")
-
-        val options = FirestoreRecyclerOptions.Builder<User>().setQuery(query, User::class.java)
-            .setLifecycleOwner(this).build()
-        adapter = object : FirestoreRecyclerAdapter<User, UserViewHolder>(options) {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-                val view = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.home_gratitude_list_item, parent, false)
-                return UserViewHolder(view)
-            }
-
-            override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                val name: TextView = holder.itemView.findViewById(R.id.itemDescription)
-                val message: TextView = holder.itemView.findViewById(R.id.authorUsername)
-                val imageView: ImageView = holder.itemView.findViewById(R.id.itemImage)
-                imageView.visibility = View.VISIBLE
-                if (model.data != "") {
-                    // using glide library to display the image
-                    storageRef.child("file/${model.data}").downloadUrl.addOnSuccessListener {
-                        Glide.with(requireActivity()).load(it).into(imageView)
-                        Log.e("Firebase", "download passed")
-                    }.addOnFailureListener {
-                        Log.e("Firebase", "Failed in downloading")
-
-                    }
-                } else {
-                    // Disable imageview if no image was passed by the user
-                    imageView.visibility = View.GONE
-
-                }
-
-                name.text = model.data
-                message.text = model.entryName
-            }
-        }
 
         initializeDatabase()
         initializeAdapter(root)
