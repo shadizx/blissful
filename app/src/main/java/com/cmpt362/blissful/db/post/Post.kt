@@ -1,7 +1,7 @@
 package com.cmpt362.blissful.db.post
 
 import com.google.firebase.firestore.DocumentId
-import java.util.*
+import java.util.Calendar
 
 data class Post(
     @DocumentId var id: String = "",
