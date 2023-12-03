@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -16,13 +15,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -52,7 +51,7 @@ class AddFragment : Fragment() {
     private lateinit var intent: Intent
     private lateinit var tempImgFile: File
     private lateinit var imageView: ImageView
-    private lateinit var publicToggleSwitch: Switch
+    private lateinit var publicToggleSwitch: SwitchCompat
 
     private val tempImgFileName = "temp_image.jpg"
 
@@ -205,7 +204,7 @@ class AddFragment : Fragment() {
 
     private fun submitPost() {
         val userId = getUserId(requireContext())
-        if (userId == null || userId == "") {
+        if (userId == "") {
             Toast.makeText(
                 requireContext(), "Please sign in to submit a post", Toast.LENGTH_SHORT
             ).show()
@@ -256,9 +255,9 @@ class AddFragment : Fragment() {
 
         // Add the post to Firestore
         postsCollection.add(post.toMap()).addOnSuccessListener { documentReference ->
-                Log.d(TAG, "Post added with ID: ${documentReference.id}")
-            }.addOnFailureListener { e ->
-                Log.e(TAG, "Error adding post", e)
-            }
+            Log.d(TAG, "Post added with ID: ${documentReference.id}")
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "Error adding post", e)
+        }
     }
 }
