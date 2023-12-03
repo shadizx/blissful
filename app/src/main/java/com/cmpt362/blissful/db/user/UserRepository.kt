@@ -29,7 +29,8 @@ class UserRepository(private val db: FirebaseFirestore) {
     }
 
     suspend fun isUserExist(username: String, password: String): Boolean {
-        val snapshot = db.collection("users").whereEqualTo("username", username).whereEqualTo("password", password).get().await()
+        val snapshot = db.collection("users").whereEqualTo("username", username)
+            .whereEqualTo("password", password).get().await()
         return !snapshot.isEmpty
     }
 
@@ -39,7 +40,8 @@ class UserRepository(private val db: FirebaseFirestore) {
     }
 
     suspend fun getIdForUser(username: String): String? {
-        val snapshot = db.collection("users").whereEqualTo("username", username).limit(1).get().await()
+        val snapshot =
+            db.collection("users").whereEqualTo("username", username).limit(1).get().await()
         return if (!snapshot.isEmpty) snapshot.documents[0].id else null
     }
 
