@@ -69,11 +69,21 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateDisplayedPosts() {
-        lifecycleScope.launch {
-            postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
-                publicPostsAdapter.setData(it)
-                publicPostsAdapter.notifyDataSetChanged()
-                publicPostsRecyclerView.adapter = publicPostsAdapter
+        if (isSignedIn) {
+            lifecycleScope.launch {
+                postViewModel.getPostsWithoutUserId(userId).observe(viewLifecycleOwner) {
+                    publicPostsAdapter.setData(it)
+                    publicPostsAdapter.notifyDataSetChanged()
+                    publicPostsRecyclerView.adapter = publicPostsAdapter
+                }
+            }
+        } else {
+            lifecycleScope.launch {
+                postViewModel.getPublicPosts().observe(viewLifecycleOwner) {
+                    publicPostsAdapter.setData(it)
+                    publicPostsAdapter.notifyDataSetChanged()
+                    publicPostsRecyclerView.adapter = publicPostsAdapter
+                }
             }
         }
     }

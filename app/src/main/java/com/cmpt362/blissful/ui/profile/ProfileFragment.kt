@@ -203,7 +203,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateAchievementComponent(numPosts: Int) {
-        val firstPostProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.first_post_progressbar)
+        val firstPostProgressBar =
+            viewFlipper.findViewById<ProgressBar>(R.id.first_post_progressbar)
         val tenPostsProgressBar = viewFlipper.findViewById<ProgressBar>(R.id.ten_posts_progressbar)
         val firstPostText = viewFlipper.findViewById<TextView>(R.id.first_post_text)
         val tenPostsText = viewFlipper.findViewById<TextView>(R.id.ten_posts_text)
@@ -269,14 +270,14 @@ class ProfileFragment : Fragment() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    signUpUser(user)
-                } else {
-                    Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT)
-                        .show()
-                }
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                signUpUser(user)
+            } else {
+                Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT)
+                    .show()
             }
+        }
     }
 
     override fun onStart() {
@@ -321,8 +322,10 @@ class ProfileFragment : Fragment() {
 
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-            getCredentials()
-            setUpPage()
+            if (isAdded && context != null) {
+                getCredentials()
+                setUpPage()
+            }
         }
 
     private companion object LoginActivity {

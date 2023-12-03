@@ -28,6 +28,9 @@ import com.bumptech.glide.Glide
 import com.cmpt362.blissful.R
 import com.cmpt362.blissful.databinding.FragmentAddBinding
 import com.cmpt362.blissful.db.post.Post
+import com.cmpt362.blissful.db.post.PostRepository
+import com.cmpt362.blissful.db.post.PostViewModel
+import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -65,9 +68,10 @@ class AddFragment : Fragment() {
     private lateinit var submitButton: Button
     private lateinit var postTextView: EditText
 
-    private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private val storageRef = Firebase.storage.reference
+
+    private lateinit var postViewModel: PostViewModel
 
 
     override fun onCreateView(
@@ -77,8 +81,8 @@ class AddFragment : Fragment() {
         addViewModel = ViewModelProvider(this)[AddViewModel::class.java]
 
         _binding = FragmentAddBinding.inflate(inflater, container, false)
-        db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
+        initializeDatabase()
         publicToggleSwitch = binding.publicToggleSwitch
         publicToggleSwitch.setOnCheckedChangeListener { _, isChecked ->
             addViewModel.isPublic.value = isChecked
@@ -155,6 +159,12 @@ class AddFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun initializeDatabase() {
+        val postRepository = PostRepository(FirebaseFirestore.getInstance())
+        val viewModelFactory = PostViewModelFactory(postRepository)
+        postViewModel = ViewModelProvider(this, viewModelFactory)[PostViewModel::class.java]
     }
 
     override fun onDestroyView() {
@@ -251,7 +261,7 @@ class AddFragment : Fragment() {
                 }
 
                 // Save post to Firebase Firestore
-                savePostToFirestore(post)
+                postViewModel.insert(post);
 
                 postTextView.text.clear()
                 Toast.makeText(requireContext(), "Post submitted", Toast.LENGTH_SHORT).show()
@@ -259,19 +269,6 @@ class AddFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter a post text", Toast.LENGTH_SHORT)
                     .show()
             }
-        }
-    }
-
-
-    private fun savePostToFirestore(post: Post) {
-        // Set the collection reference to the "posts" collection
-        val postsCollection = db.collection("posts")
-
-        // Add the post to Firestore
-        postsCollection.add(post.toMap()).addOnSuccessListener { documentReference ->
-            Log.d(TAG, "Post added with ID: ${documentReference.id}")
-        }.addOnFailureListener { e ->
-            Log.e(TAG, "Error adding post", e)
         }
     }
 }

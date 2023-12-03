@@ -49,19 +49,7 @@
         android:layout_marginEnd="12dp" />
 
     <TextView
-        android:id="@+id/authorUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp" />
-
-    <TextView
         android:id="@+id/itemPostDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp" />
-
-    <TextView
-        android:id="@+id/itemLastUpdateDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp" />

@@ -30,7 +30,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
         val storageRef = Firebase.storage.reference
 
         holder.itemDescription.text = item.content
-        holder.authorUsername.text = item.userId // TODO: update to display username
         holder.itemPostDate.text = dateFormat.format(item.postDateTime)
         holder.itemNumberOfLikes.text = item.likesCount.toString()
 
@@ -39,7 +38,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
             Log.d("ImageUrl", item.imageUrl!!)
             storageRef.child("file/${item.imageUrl}").downloadUrl.addOnSuccessListener {
                 Glide.with(holder.itemView).load(it).into(holder.itemImage)
-                Log.e("Firebase", "download passed")
             }.addOnFailureListener {
                 Log.e("Firebase", "Failed in downloading")
             }
@@ -65,7 +63,6 @@ class GratitudeAdapter(private var gratitudeItems: List<Post>) :
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemImage: ImageView = itemView.findViewById(R.id.itemImage)
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
-        val authorUsername: TextView = itemView.findViewById(R.id.authorUsername)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)
         val itemNumberOfLikes: TextView = itemView.findViewById(R.id.itemNumberOfLikes)
     }
