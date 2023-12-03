@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -58,7 +60,7 @@ class HomeFragment : Fragment() {
         publicPostsRecyclerView = root.findViewById(R.id.public_posts)
         publicPostsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         publicPostsArrayList = ArrayList()
-        publicPostsAdapter = GratitudeAdapter(publicPostsArrayList)
+        publicPostsAdapter = GratitudeAdapter(publicPostsArrayList, ::onHeartToggled)
         publicPostsRecyclerView.adapter = publicPostsAdapter
         publicPostsRecyclerView.isNestedScrollingEnabled = false
     }
@@ -123,4 +125,25 @@ class HomeFragment : Fragment() {
         findNavController().navigate(R.id.navigation_add)
     }
 
+    private fun onHeartToggled(postId: String, heartToggle: ToggleButton) {
+        if (isSignedIn) {
+            if (heartToggle.isChecked) {
+                postViewModel.likePost(postId, userId)
+                Toast.makeText(
+                    requireContext(),
+                    "Liked post $postId by user $userId",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Unliked post $postId by user $userId",
+                    Toast.LENGTH_SHORT
+                ).show()
+                postViewModel.unlikePost(postId, userId)
+            }
+        } else {
+            heartToggle.isChecked = false
+        }
+    }
 }

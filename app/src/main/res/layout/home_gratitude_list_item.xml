@@ -19,17 +19,20 @@
             android:id="@+id/itemDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="30dp"/>
+            android:layout_marginEnd="30dp" />
 
-        <ImageView
-            android:id="@+id/heart_icon"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
+        <ToggleButton
+            android:id="@+id/heartToggle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentEnd="true"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="12dp"
-            android:src="@drawable/heart_icon" />
+            android:background="@drawable/heart_toggle"
+            android:src="@drawable/heart"
+            android:textOff=""
+            android:textOn="" />
 
         <TextView
             android:id="@+id/itemNumberOfLikes"
