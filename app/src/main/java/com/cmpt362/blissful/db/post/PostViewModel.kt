@@ -8,12 +8,9 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class PostViewModel(private val repository: PostRepository) : ViewModel() {
-
     val allPosts: LiveData<List<Post>> = repository.allPosts.asLiveData()
-
     fun getPublicPosts(): LiveData<List<Post>> =
         repository.getPublicPosts().asLiveData()
 
@@ -22,11 +19,6 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
 
     fun getPostsWithoutUserId(userId: String): LiveData<List<Post>> =
         repository.getPostsWithoutUserId(userId).asLiveData()
-
-    fun getPostById(postId: String): LiveData<Post?> = repository.getPostById(postId).asLiveData()
-
-    fun getPostsBetweenPostTime(startTime: Calendar, endTime: Calendar): LiveData<List<Post>> =
-        repository.getPostsBetweenPostTime(startTime, endTime).asLiveData()
 
     fun insert(post: Post): LiveData<String> {
         val postIdLiveData = MutableLiveData<String>()
