@@ -16,4 +16,5 @@
     <string name="settings">Settings</string>
     <string name="daily_notification">Do you want daily notification?</string>
     <string name="back">Back</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
 </resources>

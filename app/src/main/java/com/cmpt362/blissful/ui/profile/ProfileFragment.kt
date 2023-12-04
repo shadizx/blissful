@@ -38,7 +38,6 @@ import com.cmpt362.blissful.ui.home.PostAdapter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -136,7 +135,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setGoogleLogin() {
-        // Initialize Firebase Auth
         auth = Firebase.auth
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -251,7 +249,7 @@ class ProfileFragment : Fragment() {
     private fun setUpSignedOutPage() {
         val signInButton: Button = viewFlipper.findViewById(R.id.sign_in_button)
         val signUpButton: Button = viewFlipper.findViewById(R.id.sign_up_button)
-        val googleSignInButton: SignInButton = viewFlipper.findViewById(R.id.btnSignIn)
+        val googleSignInButton: Button = viewFlipper.findViewById(R.id.google_sign_in)
 
         signInButton.setOnClickListener {
             val intent = Intent(requireContext(), SignInActivity::class.java)

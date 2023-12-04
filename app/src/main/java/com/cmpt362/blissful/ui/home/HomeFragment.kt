@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -155,6 +156,8 @@ class HomeFragment : Fragment() {
             }
         } else {
             heartToggle.isChecked = false
+            Toast.makeText(requireContext(), "Please sign in to like posts", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 }
