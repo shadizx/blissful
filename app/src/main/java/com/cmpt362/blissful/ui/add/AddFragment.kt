@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -32,6 +35,7 @@ import com.cmpt362.blissful.db.post.PostRepository
 import com.cmpt362.blissful.db.post.PostViewModel
 import com.cmpt362.blissful.db.post.PostViewModelFactory
 import com.cmpt362.blissful.db.util.getUserId
+import com.cmpt362.blissful.db.util.getUserName
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -67,6 +71,7 @@ class AddFragment : Fragment() {
 
     private lateinit var submitButton: Button
     private lateinit var postTextView: EditText
+    private lateinit var characterCountText: TextView
 
     private lateinit var auth: FirebaseAuth
     private val storageRef = Firebase.storage.reference
@@ -150,8 +155,27 @@ class AddFragment : Fragment() {
             }
         }
 
-
+        characterCountText = binding.characterCountText
         postTextView = binding.postInput
+        postTextView.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(
+                s: CharSequence, start: Int, before: Int,
+                count: Int
+            ) {
+
+                characterCountText.text = "${1000 - s.length} characters"
+            }
+
+
+            override fun beforeTextChanged(
+                s: CharSequence, start: Int, count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun afterTextChanged(s: Editable) {
+            }
+        })
         submitButton = binding.submitButton
         submitButton.setOnClickListener {
             submitPost()
@@ -217,6 +241,7 @@ class AddFragment : Fragment() {
 
     private fun submitPost() {
         val userId = getUserId(requireContext())
+        val userName = getUserName(requireContext())
         if (userId == "") {
             Toast.makeText(
                 requireContext(), "Please sign in to submit a post", Toast.LENGTH_SHORT
@@ -228,7 +253,7 @@ class AddFragment : Fragment() {
                 val isPublic = addViewModel.isPublic.value ?: false
 
                 val defaultPost = Post(
-                    userId = userId, content = postText, isPublic = isPublic
+                    userId = userId, userName = userName, content = postText, isPublic = isPublic
                 )
 
                 val post = if (addViewModel.newImage.value != null) {
@@ -248,6 +273,7 @@ class AddFragment : Fragment() {
                             }
                         Post(
                             userId = userId,
+                            userName = userName,
                             content = postText,
                             isPublic = isPublic,
                             imageUrl = imageUrl,

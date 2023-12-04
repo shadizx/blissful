@@ -78,6 +78,7 @@ class SignUpActivity : AppCompatActivity() {
                 val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
                 val editor = sharedPreferences.edit()
                 editor.putString("userId", userId)
+                editor.putString("userName", username)
                 editor.apply()
 
                 Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()

@@ -239,6 +239,7 @@ class ProfileFragment : Fragment() {
 
     private fun updateDisplayedPosts() {
         lifecycleScope.launch {
+
             postViewModel.getPostsByUserId(userId).observe(viewLifecycleOwner) {
                 userPostsAdapter.setData(it)
                 userPostsAdapter.notifyDataSetChanged()
@@ -297,6 +298,7 @@ class ProfileFragment : Fragment() {
                         val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
                         val editor = sharedPreferences.edit()
                         editor.putString("userId", userId)
+                        editor.putString("userName", username)
                         editor.apply()
                     }
                 }
@@ -312,6 +314,7 @@ class ProfileFragment : Fragment() {
             val sharedPreferences = requireActivity().getSharedPreferences("user", 0)
             val editor = sharedPreferences.edit()
             editor.putString("userId", id)
+            editor.putString("userName", username)
             editor.apply()
         }
     }

@@ -34,6 +34,7 @@ class PostAdapter(
         val storageRef = Firebase.storage.reference
 
         holder.itemDescription.text = item.content
+        holder.authorUsername.text = item.userName
         holder.itemPostDate.text = dateFormat.format(item.postDateTime)
         holder.itemNumberOfLikes.text = item.likesCount.toString()
 
@@ -70,6 +71,7 @@ class PostAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemImage: ImageView = itemView.findViewById(R.id.itemImage)
         val itemDescription: TextView = itemView.findViewById(R.id.itemDescription)
+        val authorUsername: TextView = itemView.findViewById(R.id.authorUsername)
         val itemPostDate: TextView = itemView.findViewById(R.id.itemPostDate)
         val itemNumberOfLikes: TextView = itemView.findViewById(R.id.itemNumberOfLikes)
         val heartToggle: ToggleButton = itemView.findViewById(R.id.heartToggle)
