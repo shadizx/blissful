@@ -62,7 +62,8 @@ class SignInActivity : AppCompatActivity() {
                 }
             }
         } else {
-            Toast.makeText(this, "Please enter your username and password", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter your username and password", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -71,6 +72,7 @@ class SignInActivity : AppCompatActivity() {
             val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
             val editor = sharedPreferences.edit()
             editor.putString("userId", userId)
+            editor.putString("userName", username)
             editor.apply()
         }
         setResult(Activity.RESULT_OK)
